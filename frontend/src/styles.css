@@ -1,0 +1,48 @@
+.business-details {
+    background-color: #e8f5e9; /* Açık yeşil arka plan */
+    color: #2e7d32; /* Yeşil metin rengi */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .business-details h2 {
+    color: #1b5e20; /* Daha koyu yeşil başlık */
+  }
+  
+  .business-details img {
+    border: 2px solid #1b5e20; /* Fotoğrafların çevresine yeşil çerçeve */
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .business-details ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .business-details li {
+    margin-bottom: 10px;
+  }
+  
+  .business-details h3 {
+    color: #2e7d32; /* Başlıklar için daha koyu bir yeşil */
+    border-bottom: 2px solid #1b5e20;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .business-details .business-gallery img {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .business-details .business-gallery img:hover {
+    transform: scale(1.1); /* Hover sırasında büyütme efekti */
+  }
+  
+  .business-details .business-gallery {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+  
