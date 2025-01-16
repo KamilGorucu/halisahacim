@@ -74,7 +74,6 @@ const Navigation = () => {
 
         {user && (
           <>
-            <li><Link to="/">Anasayfa</Link></li>
             <li><Link to="/search">Halısahalar</Link></li>
             <li><Link to="/profile/user">Profilim</Link></li>
             <li style={{ cursor: 'pointer' }} onClick={logout}>Çıkış Yap</li>
@@ -83,7 +82,6 @@ const Navigation = () => {
 
         {business && business.isActive && (
           <>
-            <li><Link to="/">Anasayfa</Link></li>
             <li><Link to="/profile/business">Profilim</Link></li>
             <li style={{ cursor: 'pointer' }} onClick={logout}>Çıkış Yap</li>
           </>
@@ -91,7 +89,6 @@ const Navigation = () => {
 
         {business && !business.isActive && (
           <>
-            <li><Link to="/">Anasayfa</Link></li>
             <li><Link to="/payment">Ödeme Yap</Link></li>
             <li style={{ color: 'red' }}>Ödemeniz gerçekleşmeden işletmeniz aktif edilemez!</li>
             <li style={{ cursor: 'pointer' }} onClick={logout}>Çıkış Yap</li>

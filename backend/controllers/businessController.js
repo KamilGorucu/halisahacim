@@ -2,30 +2,60 @@ const Business = require('../models/Business');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const plainPassword = "1234"; // Giriş sırasında gönderilen şifre
+const hash = "$2b$10$S2jcX6AFVao8h6Y.BuAy.OmtOG1YdGPgiB7NSyJ18oFm3eLa/nZkS"; // DB'den gelen hash
+
+bcrypt.compare(plainPassword, hash, (err, result) => {
+  if (err) {
+    console.error("Doğrulama hatası:", err);
+  }
+  console.log("Doğrulama Sonucu:", result); // true ya da false beklenir
+});
+
 /**
  * İşletme Kaydı
  */
  exports.registerBusiness = async (req, res) => {
   try {
     console.log('Gelen veri:', req.body);
-    const { ownerName, businessName, email, password, location, workingHours, equipment } = req.body;
 
-    if (!ownerName || !businessName || !email || !password || !location.coordinates || !workingHours) {
+    // Gelen verileri parse et
+    const { ownerName, businessName, email, password, location, workingHours, equipment } = req.body;
+    const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+    const parsedWorkingHours = typeof workingHours === 'string' ? JSON.parse(workingHours) : workingHours;
+
+    // E-posta normalizasyonu
+    const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
+
+    if (
+      !ownerName ||
+      !businessName ||
+      !normalizedEmail ||
+      !password ||
+      !parsedLocation.coordinates ||
+      !parsedWorkingHours
+    ) {
       return res.status(400).json({ message: 'Tüm alanlar doldurulmalıdır!' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("Hashlenmiş Şifre:", hashedPassword);
+
+    // Fotoğrafları ekle
+    const photos = req.files ? req.files.map((file) => file.path) : [];
+
     const newBusiness = new Business({
       ownerName,
       businessName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       location: {
-        city: location.city || 'Belirtilmemiş', // Eğer şehir bilgisi yoksa varsayılan olarak "Belirtilmemiş"
-        coordinates: location.coordinates,
+        city: parsedLocation.city || 'Belirtilmemiş',
+        coordinates: parsedLocation.coordinates,
       },
-      workingHours,
+      workingHours: parsedWorkingHours,
       equipment,
+      photos,
       isActive: false,
     });
 
@@ -37,6 +67,7 @@ const jwt = require('jsonwebtoken');
   }
 };
 
+
 /**
  * İşletme Girişi
  */
@@ -44,17 +75,25 @@ exports.loginBusiness = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // E-posta normalizasyonu
+    const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
+    console.log('Normalized Email:', normalizedEmail);
+
     // İşletmeyi bul
-    const business = await Business.findOne({ email });
+    const business = await Business.findOne({ email: normalizedEmail });
     if (!business) {
       return res.status(404).json({ message: 'İşletme bulunamadı!' });
     }
 
     // Şifre doğrulaması yap
+    console.log('Kullanıcı Şifresi:', password);
+    console.log('Hashlenmiş Şifre:', business.password);
     const isPasswordValid = await bcrypt.compare(password, business.password);
     if (!isPasswordValid) {
+      console.log('Şifre doğrulaması başarısız.');
       return res.status(401).json({ message: 'Geçersiz şifre!' });
     }
+    console.log('Şifre doğrulaması başarılı.');
 
     // Token oluştur
     const token = jwt.sign(
@@ -86,17 +125,27 @@ exports.loginBusiness = async (req, res) => {
  exports.searchBusinesses = async (req, res) => {
   const { city } = req.query;
 
+  if (!city) {
+    return res.status(400).json({ message: 'Şehir bilgisi gereklidir!' });
+  }
+
   try {
-    const businesses = await Business.find({ "location.city": city, isActive: true }).select(
-      "businessName location workingHours"
-    );
+    // Şehir adını normalize et
+    const normalizedCity = city.toLowerCase().trim();
+
+    const businesses = await Business.find({
+      "location.city": { $regex: new RegExp(`^${normalizedCity}$`, 'i') },
+      isActive: true,
+    }).select('businessName location workingHours');
+
     if (businesses.length === 0) {
-      return res.status(404).json({ message: "Bu şehirde aktif işletme bulunamadı!" });
+      return res.status(404).json({ message: 'Bu şehirde aktif işletme bulunamadı!' });
     }
 
     res.status(200).json(businesses);
   } catch (error) {
-    res.status(500).json({ message: "İşletmeler aranırken bir hata oluştu.", error: error.message });
+    console.error('Hata (searchBusinesses):', error.message);
+    res.status(500).json({ message: 'İşletmeler aranırken bir hata oluştu.', error: error.message });
   }
 };
 

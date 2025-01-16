@@ -14,27 +14,56 @@ const BusinessRegister = () => {
     email: '',
     password: '',
     location: { city: '', coordinates: [] },
-    workingHours: { start: '', end: '' },
+    workingHours: [],
     equipment: '',
+    photos: [],
   });
   const [mapPosition, setMapPosition] = useState({ lat: 41.0082, lng: 28.9784 }); // Varsayılan konum: İstanbul
+  const [startHour, setStartHour] = useState('');
+  const [endHour, setEndHour] = useState('');
+  const [selectedPhotos, setSelectedPhotos] = useState([]); // Fotoğraf seçimlerini tutmak için
+
   const navigate = useNavigate();
+
+  const handleAddTimeSlot = () => {
+    if (startHour && endHour) {
+      setFormData((prevData) => ({
+        ...prevData,
+        workingHours: [...prevData.workingHours, { start: startHour, end: endHour }],
+      }));
+      setStartHour('');
+      setEndHour('');
+    } else {
+      alert('Lütfen başlangıç ve bitiş saatlerini girin.');
+    }
+  };
+
+  const handleRemoveTimeSlot = (slot) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      workingHours: prevData.workingHours.filter((item) => item !== slot),
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    setSelectedPhotos([...e.target.files]); // Seçilen dosyaları kaydet
+  };
 
   const handleMapClick = async (event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     setMapPosition({ lat, lng });
-  
+
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyAGpwA7ia84Gv6fmwJru1Kv04l3n6Qzknk`
       );
       const data = await response.json();
-  
+
       const city = data.results[0]?.address_components.find((comp) =>
         comp.types.includes('administrative_area_level_1')
       )?.long_name;
-  
+
       setFormData((prevData) => ({
         ...prevData,
         location: { city: city || '', coordinates: [lng, lat] },
@@ -44,21 +73,29 @@ const BusinessRegister = () => {
       alert('Konum alınamadı. Lütfen tekrar deneyiniz.');
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formDataWithPhotos = new FormData();
+
+    Object.keys(formData).forEach((key) => {
+      if (key === 'photos') {
+        selectedPhotos.forEach((photo) => formDataWithPhotos.append('photos', photo));
+      } else {
+        formDataWithPhotos.append(key, JSON.stringify(formData[key]));
+      }
+    });
+
     try {
       const response = await fetch('http://localhost:5002/api/business/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: formDataWithPhotos,
       });
 
       const data = await response.json();
       if (response.ok) {
         alert('İşletme kaydı başarılı! Ödeme sayfasına yönlendiriliyorsunuz.');
-        navigate('/payment'); // Ödeme sayfasına yönlendir
+        navigate('/payment');
       } else {
         alert(data.message);
       }
@@ -72,6 +109,7 @@ const BusinessRegister = () => {
     <div>
       <h2>İşletme Kayıt</h2>
       <form onSubmit={handleSubmit}>
+        {/* İşletme Bilgileri */}
         <input
           type="text"
           placeholder="İşletme Sahibi Adı"
@@ -105,14 +143,45 @@ const BusinessRegister = () => {
           value={formData.equipment}
           onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
         />
+
+        {/* Saat Aralığı Seçimi */}
+        <h3>Saat Aralıkları</h3>
+        <div>
+          <label>Başlangıç Saati:</label>
+          <input
+            type="time"
+            value={startHour}
+            onChange={(e) => setStartHour(e.target.value)}
+          />
+          <label>Bitiş Saati:</label>
+          <input
+            type="time"
+            value={endHour}
+            onChange={(e) => setEndHour(e.target.value)}
+          />
+          <button type="button" onClick={handleAddTimeSlot}>
+            Saat Aralığı Ekle
+          </button>
+        </div>
+        <ul>
+          {formData.workingHours.map((slot, index) => (
+            <li key={index}>
+              {slot.start} - {slot.end}{' '}
+              <button type="button" onClick={() => handleRemoveTimeSlot(slot)}>
+                Kaldır
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* Fotoğraf Yükleme */}
+        <h3>Fotoğraflar</h3>
+        <input type="file" multiple onChange={handleFileChange} />
+
+        {/* Harita */}
         <h3>Harita Üzerinden Konum Belirle</h3>
         <LoadScript googleMapsApiKey="AIzaSyAGpwA7ia84Gv6fmwJru1Kv04l3n6Qzknk">
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={mapPosition}
-            zoom={14}
-            onClick={handleMapClick}
-          >
+          <GoogleMap mapContainerStyle={containerStyle} center={mapPosition} zoom={14} onClick={handleMapClick}>
             <Marker position={mapPosition} />
           </GoogleMap>
         </LoadScript>
@@ -120,29 +189,7 @@ const BusinessRegister = () => {
           Seçilen Konum: Lat: {formData.location.coordinates[1] || '-'}, Lng: {formData.location.coordinates[0] || '-'}
         </p>
         <p>Şehir: {formData.location.city || 'Belirtilmemiş'}</p>
-        <label>
-          Çalışma Saatleri (Başlangıç):
-          <input
-            type="time"
-            value={formData.workingHours.start}
-            onChange={(e) =>
-              setFormData({ ...formData, workingHours: { ...formData.workingHours, start: e.target.value } })
-            }
-            required
-          />
-        </label>
-        <label>
-          Çalışma Saatleri (Bitiş):
-          <input
-            type="time"
-            value={formData.workingHours.end}
-            onChange={(e) =>
-              setFormData({ ...formData, workingHours: { ...formData.workingHours, end: e.target.value } })
-            }
-            required
-          />
-        </label>
-        <button type="submit">Kayıt Ol</button>
+        <button type="submit">Kaydet</button>
       </form>
     </div>
   );

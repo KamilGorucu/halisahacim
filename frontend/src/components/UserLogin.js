@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AuthContext from '../contexts/AuthContext';
 
 const UserLogin = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const { login } = useContext(AuthContext); // AuthContext'ten `login` alınıyor.
   const navigate = useNavigate();
 
-  // Kullanıcı giriş formu gönderildiğinde çalışacak
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // API'ye giriş isteği gönder
       const response = await fetch('http://localhost:5002/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,9 +18,9 @@ const UserLogin = () => {
 
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem('token', data.token); // Token'ı sakla
+        login(data.token); // Token kaydediliyor.
         alert('Giriş başarılı!');
-        navigate('/profile/user'); // Kullanıcı profil sayfasına yönlendir
+        navigate('/profile/user'); // Kullanıcı profil sayfasına yönlendiriliyor.
       } else {
         alert(data.message);
       }

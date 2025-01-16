@@ -14,12 +14,15 @@ const BusinessSchema = new mongoose.Schema({
     coordinates: { type: [Number], required: true }, // Enlem ve boylam
     city: { type: String, required: true }, // Şehir
   },
-  workingHours: {
-    start: { type: String, required: true }, // Çalışma saat başlangıcı
-    end: { type: String, required: true }, // Çalışma saat bitişi
-  },
+  workingHours: [
+    {
+      start: { type: String, required: true }, // Başlangıç saati
+      end: { type: String, required: true },   // Bitiş saati
+    },
+  ],
   equipment: { type: String }, // Ekipman bilgileri
   freeTrialStart: { type: Date, default: Date.now }, // Ücretsiz deneme başlangıcı
+  photos: [{ type: String }], // Fotoğraf yolları
   isActive: { type: Boolean, default: false }, // Ödeme sonrası aktiflik
 });
 

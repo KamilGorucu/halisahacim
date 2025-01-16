@@ -12,31 +12,35 @@ const BusinessLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    // Emaili normalize et
+    const normalizedEmail = formData.email.trim().toLowerCase();
+  
     try {
       const response = await fetch('http://localhost:5002/api/business/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, email: normalizedEmail }),
       });
-
+  
       const data = await response.json();
       if (response.ok) {
-        login(data.token); // Giriş işlemi sırasında token'ı kaydet.
+        login(data.token);
         if (!data.isActive) {
           alert('Ödemeniz gerçekleşmeden işletmeniz aktif olmayacaktır. Ödeme sayfasına yönlendiriliyorsunuz.');
-          navigate('/payment'); // Ödeme sayfasına yönlendir.
+          navigate('/payment');
         } else {
           alert('Giriş başarılı!');
-          navigate('/profile/business'); // Profil sayfasına yönlendir.
+          navigate('/profile/business');
         }
       } else {
-        alert(data.message); // Hata mesajını göster.
+        alert(data.message);
       }
     } catch (error) {
-      console.error('Giriş hatası:', error); // Hata logla.
+      console.error('Giriş hatası:', error);
       alert('Giriş sırasında bir hata oluştu.');
     }
-  };
+  };  
 
   return (
     <form onSubmit={handleSubmit}>

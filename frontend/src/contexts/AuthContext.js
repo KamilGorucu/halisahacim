@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // JWT çözümleme için doğru import.
+import { jwtDecode } from 'jwt-decode'; // Düzeltildi: Doğru import.
 
 const AuthContext = createContext();
 
@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Kullanıcı bilgilerini tutar.
   const [business, setBusiness] = useState(null); // İşletme bilgilerini tutar.
   const [token, setToken] = useState(localStorage.getItem('token')); // Token bilgisini saklar.
+  const [refreshTrigger, setRefreshTrigger] = useState(false); // Render tetikleyici.
 
   useEffect(() => {
     if (token) {
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         logout(); // Geçersiz token varsa çıkış yap.
       }
     }
-  }, [token]);
+  }, [token, refreshTrigger]); // `refreshTrigger` eklenerek tetikleniyor.
 
   const login = (newToken) => {
     const decoded = jwtDecode(newToken); // Yeni token'ı çözümle.
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     }
     setToken(newToken);
     localStorage.setItem('token', newToken); // Token'ı localStorage'da sakla.
+    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor.
   };
 
   const logout = () => {
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null); // Token'ı sıfırla.
     setUser(null); // Kullanıcı bilgisini sıfırla.
     setBusiness(null); // İşletme bilgisini sıfırla.
+    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor.
   };
 
   return (

@@ -15,8 +15,8 @@ const AvailableSlotsTable = () => {
       const response = await fetch(
         `http://localhost:5002/api/reservations/available-slots?businessId=${business._id}&date=${selectedDate}`
       );
-      const data = await response.json();
 
+      const data = await response.json();
       if (response.ok) {
         setSlots(data.slots); // Gelen saat aralıklarını kaydet
       } else {
