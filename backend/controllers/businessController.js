@@ -2,18 +2,6 @@ const Business = require('../models/Business');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Test şifresi ve hash
-const password = '1234';
-const hash = '$2b$10$S2jcX6AFVao8h6Y.BuAy.OmtOG1YdGPgiB7NSyJ18oFm3eLa/nZkS';
-
-bcrypt.compare(password, hash, (err, isMatch) => {
-  if (err) {
-    console.error('Hata:', err);
-  } else {
-    console.log('Doğrulama Sonucu:', isMatch);
-  }
-});
-
 /**
  * İşletme Kaydı
  */
@@ -29,6 +17,9 @@ bcrypt.compare(password, hash, (err, isMatch) => {
     // E-posta normalizasyonu
     const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
 
+    // Gelen verileri temizle
+    const cleanedPassword = password.replace(/['"]+/g, '');
+
     if (
       !ownerName ||
       !businessName ||
@@ -40,15 +31,15 @@ bcrypt.compare(password, hash, (err, isMatch) => {
       return res.status(400).json({ message: 'Tüm alanlar doldurulmalıdır!' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Hashlenmiş Şifre:", hashedPassword);
-
+    // Şifreyi hashle
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(cleanedPassword, salt);
     // Fotoğrafları ekle
     const photos = req.files ? req.files.map((file) => file.path) : [];
 
     const newBusiness = new Business({
-      ownerName,
-      businessName,
+      ownerName: ownerName.replace(/['"]+/g, ''),
+      businessName: businessName.replace(/['"]+/g, ''),
       email: normalizedEmail,
       password: hashedPassword,
       location: {
@@ -56,7 +47,7 @@ bcrypt.compare(password, hash, (err, isMatch) => {
         coordinates: parsedLocation.coordinates,
       },
       workingHours: parsedWorkingHours,
-      equipment,
+      equipment: equipment.replace(/['"]+/g, ''),
       photos,
       isActive: false,
     });
