@@ -18,7 +18,7 @@ const UserLogin = () => {
 
       const data = await response.json();
       if (response.ok) {
-        login(data.token); // Token kaydediliyor.
+        login(data.token, formData.email); // E-posta bilgisi login işlevine gönderiliyor
         alert('Giriş başarılı!');
         navigate('/profile/user'); // Kullanıcı profil sayfasına yönlendiriliyor.
       } else {

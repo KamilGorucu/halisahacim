@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const AvailableSlotsTable = () => {
@@ -8,7 +8,7 @@ const AvailableSlotsTable = () => {
   const [selectedDate, setSelectedDate] = useState(''); // Seçilen tarih
 
   // API'den saat aralıklarını çekme
-  const fetchSlots = async () => {
+  const fetchSlots = useCallback(async () => {
     if (!selectedDate) return; // Tarih seçilmemişse işlem yapma
 
     try {
@@ -25,7 +25,7 @@ const AvailableSlotsTable = () => {
     } catch (error) {
       console.error('Saat aralıkları alınamadı:', error);
     }
-  };
+  },[selectedDate, business._id]);
 
   // Rezervasyon yapma işlemi
   const handleReservation = async (timeSlot) => {
@@ -36,7 +36,18 @@ const AvailableSlotsTable = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({ businessId: business._id, date: selectedDate, timeSlot }),
+        body: JSON.stringify({
+          userEmail: localStorage.getItem('email'), // Kullanıcı ID'sini ekleyin
+          businessId: business._id,
+          date: selectedDate,
+          timeSlot,
+        }),
+      });
+      console.log({
+        userEmail: localStorage.getItem('email'),
+        businessId: business._id,
+        date: selectedDate,
+        timeSlot,
       });
 
       if (response.ok) {
@@ -54,7 +65,7 @@ const AvailableSlotsTable = () => {
   // Tarih seçildiğinde saat aralıklarını getir
   useEffect(() => {
     fetchSlots();
-  }, [selectedDate]);
+  }, [fetchSlots]);
 
   return (
     <div>

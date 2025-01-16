@@ -1,18 +1,15 @@
 const multer = require('multer');
-const path = require('path');
 
-// Yükleme Konumu ve Ayarları
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Fotoğrafların kaydedileceği klasör
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`); // Benzersiz dosya adı oluştur
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
 const fileFilter = (req, file, cb) => {
-  // Yalnızca resim dosyalarına izin ver
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
   } else {

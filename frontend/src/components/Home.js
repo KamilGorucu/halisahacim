@@ -57,9 +57,6 @@ const Home = () => {
         <Link to="/register-business">
           <button>İşletme Sahibi Kayıt</button>
         </Link>
-        <Link to="/login">
-          <button>Giriş Yap</button>
-        </Link>
       </div>
     </div>
   );

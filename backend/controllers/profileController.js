@@ -19,15 +19,23 @@ exports.getUserProfile = async (req, res) => {
 /**
  * İşletme Profili Getir
  */
-exports.getBusinessProfile = async (req, res) => {
+ exports.getBusinessProfile = async (req, res) => {
   try {
-    const business = await Business.findById(req.user.id);
-    if (!business) {
-      return res.status(404).json({ message: 'İşletme bulunamadı!' });
+    const businessId = req.businessId; // Middleware'den gelen işletme ID
+
+    if (!businessId) {
+      return res.status(400).json({ message: 'İşletme ID gerekli.' });
     }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı.' });
+    }
+
     res.status(200).json(business);
   } catch (error) {
-    res.status(500).json({ message: 'İşletme profili alınamadı.', error: error.message });
+    console.error('Hata (getBusinessProfile):', error);
+    res.status(500).json({ message: 'İşletme profili alınırken bir hata oluştu.', error });
   }
 };
 

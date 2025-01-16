@@ -35,7 +35,7 @@ app.use('/api/payments', paymentRoutes);
 // Kullanıcı rotaları
 app.use('/api/users', userRoutes);
 app.use('/api/profile/user', profileRoutes); // Kullanıcı profilleri için
-app.use('/api/reservations/user', reservationRoutes); // Kullanıcı rezervasyonları
+app.use('/api/reservations', reservationRoutes);
 // Profil rotaları
 app.use('/api/profile', profileRoutes); // Tüm profil rotalarını ekliyoruz.
 

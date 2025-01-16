@@ -22,6 +22,7 @@ const BusinessRegister = () => {
   const [startHour, setStartHour] = useState('');
   const [endHour, setEndHour] = useState('');
   const [selectedPhotos, setSelectedPhotos] = useState([]); // Fotoğraf seçimlerini tutmak için
+  const [selectedDate, setSelectedDate] = useState(''); // Tarih seçimi
 
   const navigate = useNavigate();
 
@@ -76,22 +77,33 @@ const BusinessRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    // Form verilerini normalize et
+    const cleanedFormData = {
+      ...formData,
+      email: formData.email.trim().toLowerCase(),
+      password: formData.password.replace(/['"]+/g, ''),
+      ownerName: formData.ownerName.replace(/['"]+/g, ''),
+      businessName: formData.businessName.replace(/['"]+/g, ''),
+      equipment: formData.equipment.replace(/['"]+/g, ''),
+    };
+  
     const formDataWithPhotos = new FormData();
-
-    Object.keys(formData).forEach((key) => {
+  
+    Object.keys(cleanedFormData).forEach((key) => {
       if (key === 'photos') {
         selectedPhotos.forEach((photo) => formDataWithPhotos.append('photos', photo));
       } else {
-        formDataWithPhotos.append(key, JSON.stringify(formData[key]));
+        formDataWithPhotos.append(key, JSON.stringify(cleanedFormData[key]));
       }
     });
-
+  
     try {
       const response = await fetch('http://localhost:5002/api/business/register', {
         method: 'POST',
         body: formDataWithPhotos,
       });
-
+  
       const data = await response.json();
       if (response.ok) {
         alert('İşletme kaydı başarılı! Ödeme sayfasına yönlendiriliyorsunuz.');
@@ -103,7 +115,7 @@ const BusinessRegister = () => {
       console.error('Kayıt hatası:', error);
       alert('Kayıt sırasında bir hata oluştu.');
     }
-  };
+  };  
 
   return (
     <div>

@@ -4,17 +4,13 @@ const {
   loginBusiness,
   listBusinesses,
   getBusinessById,
-  uploadPhoto,
   searchBusinesses,
 } = require('../controllers/businessController');
-const upload = require('../middleware/uploadMiddleware'); // Upload Middleware'ini dahil et
+const upload = require('../middleware/uploadMiddleware');
 const router = express.Router();
-const businessController = require('../controllers/businessController');
 
-// İşletme kayıt rotaları
-router.post('/register', upload.array('photos', 5), registerBusiness); // Max 5 fotoğraf yüklenebilir
-router.post('/login', businessController.loginBusiness); // İşletme girişi
-// router.post('/upload', upload.single('photo'), uploadPhoto); // Fotoğraf yükleme
+router.post('/register', upload.array('photos', 5), registerBusiness);
+router.post('/login', loginBusiness);
 
 // İşletme arama ve listeleme rotaları
 router.get('/list', listBusinesses); // Tüm işletmelerin listesi

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Business = require('../models/Business');
 
 // Genel Doğrulama Middleware
 const protect = async (req, res, next) => {
@@ -23,26 +24,34 @@ const protect = async (req, res, next) => {
 const protectBusiness = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
-    return res.status(401).json({ message: 'Yetkilendirme reddedildi.' });
+    return res.status(401).json({ message: 'Yetkilendirme reddedildi. Token gerekli.' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.business = await Business.findById(decoded.id);
+    if (decoded.role !== 'business') {
+      return res.status(403).json({ message: 'Erişim yetkisi yok! Sadece işletmeler giriş yapabilir.' });
+    }
 
-    if (!req.business) {
+    // İşletmeyi veritabanından kontrol et
+    const business = await Business.findById(decoded.id);
+    if (!business) {
       return res.status(404).json({ message: 'İşletme bulunamadı.' });
     }
 
-    // İşletme aktif değilse ödeme sayfasına yönlendirin
-    if (!req.business.isActive) {
-      return res.status(403).json({ redirect: '/payment', message: 'Ödeme yapılmadan işletme aktif edilemez.' });
+    // İşletme aktif değilse yönlendirme yapılır
+    if (!business.isActive) {
+      return res.status(403).json({
+        redirect: '/payment',
+        message: 'Ödeme yapılmadan işletme aktif edilemez. Lütfen ödeme yapın.',
+      });
     }
 
+    req.businessId = decoded.id; // Token içindeki işletme kimliğini req'e ekleyin
     next();
   } catch (error) {
     console.error('Yetkilendirme hatası:', error.message);
-    res.status(401).json({ message: 'Yetkilendirme hatası.' });
+    res.status(401).json({ message: 'Yetkilendirme hatası. Geçersiz veya süresi dolmuş token.' });
   }
 };
 

@@ -11,7 +11,7 @@ import BusinessLogin from './components/BusinessLogin';
 import SearchForm from './components/SearchForm';
 import SearchResults from './components/SearchResults';
 import AvailableSlotsTable from './components/AvailableSlotsTable';
-import BusinessReservations from './components/BusinessReservations';
+import BusinessReservationTable from './components/BusinessReservationTable';
 import UserReservations from './components/UserReservations';
 import TournamentList from './components/TournamentList';
 import TournamentCreate from './components/TournamentCreate';
@@ -41,7 +41,7 @@ function App() {
           <Route path="/register-business" element={<BusinessRegister />} />
           <Route path="/login-business" element={<BusinessLogin />} />
           <Route path="/profile/business" element={<BusinessProfile />} />
-          <Route path="/reservations/business" element={<BusinessReservations />} />
+          <Route path="/reservations/business" element={<BusinessReservationTable />} />
           <Route path="/available-slots" element={<AvailableSlotsTable />} />
           <Route path="/tournaments" element={<TournamentList />} />
           <Route path="/tournament-create" element={<TournamentCreate />} />

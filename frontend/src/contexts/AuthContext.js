@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token, refreshTrigger]); // `refreshTrigger` eklenerek tetikleniyor.
 
-  const login = (newToken) => {
+  const login = (newToken, userEmail) => {
     const decoded = jwtDecode(newToken); // Yeni token'ı çözümle.
     if (decoded.role === 'user') {
       setUser({ id: decoded.id, email: decoded.email, role: 'user' });
@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     }
     setToken(newToken);
     localStorage.setItem('token', newToken); // Token'ı localStorage'da sakla.
+    localStorage.setItem('email', userEmail); // E-posta saklanıyor
     setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor.
   };
 

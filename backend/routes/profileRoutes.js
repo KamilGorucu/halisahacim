@@ -5,14 +5,14 @@ const {
   updateBusinessProfile,
   updateUserProfile,
 } = require('../controllers/profileController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, protectBusiness } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // Kullanıcı Profili Getir
 router.get('/user', protect, getUserProfile);
 
 // İşletme Profili Getir
-router.get('/business', protect, getBusinessProfile);
+router.get('/business', protectBusiness, getBusinessProfile);
 
 // İşletme Profil Güncelle
 router.put('/business/update', protect, updateBusinessProfile);

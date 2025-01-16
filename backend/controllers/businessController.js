@@ -1,5 +1,5 @@
 const Business = require('../models/Business');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 /**
@@ -9,22 +9,23 @@ const jwt = require('jsonwebtoken');
   try {
     console.log('Gelen veri:', req.body);
 
-    // Gelen verileri parse et
+    // Verileri temizle ve normalize et
     const { ownerName, businessName, email, password, location, workingHours, equipment } = req.body;
     const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
     const parsedWorkingHours = typeof workingHours === 'string' ? JSON.parse(workingHours) : workingHours;
 
-    // E-posta normalizasyonu
+    // E-posta ve şifre gibi verileri normalize et
     const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
-
-    // Gelen verileri temizle
     const cleanedPassword = password.replace(/['"]+/g, '');
+    const cleanedOwnerName = ownerName.replace(/['"]+/g, '');
+    const cleanedBusinessName = businessName.replace(/['"]+/g, '');
+    const cleanedEquipment = equipment.replace(/['"]+/g, '');
 
     if (
-      !ownerName ||
-      !businessName ||
+      !cleanedOwnerName ||
+      !cleanedBusinessName ||
       !normalizedEmail ||
-      !password ||
+      !cleanedPassword ||
       !parsedLocation.coordinates ||
       !parsedWorkingHours
     ) {
@@ -34,12 +35,10 @@ const jwt = require('jsonwebtoken');
     // Şifreyi hashle
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(cleanedPassword, salt);
-    // Fotoğrafları ekle
-    const photos = req.files ? req.files.map((file) => file.path) : [];
 
     const newBusiness = new Business({
-      ownerName: ownerName.replace(/['"]+/g, ''),
-      businessName: businessName.replace(/['"]+/g, ''),
+      ownerName: cleanedOwnerName,
+      businessName: cleanedBusinessName,
       email: normalizedEmail,
       password: hashedPassword,
       location: {
@@ -47,8 +46,7 @@ const jwt = require('jsonwebtoken');
         coordinates: parsedLocation.coordinates,
       },
       workingHours: parsedWorkingHours,
-      equipment: equipment.replace(/['"]+/g, ''),
-      photos,
+      equipment: cleanedEquipment,
       isActive: false,
     });
 
@@ -64,12 +62,13 @@ const jwt = require('jsonwebtoken');
 /**
  * İşletme Girişi
  */
-exports.loginBusiness = async (req, res) => {
+ exports.loginBusiness = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // E-posta normalizasyonu
+    // Verileri temizle ve normalize et
     const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
+    const cleanedPassword = password.replace(/['"]+/g, '');
     console.log('Normalized Email:', normalizedEmail);
 
     // İşletmeyi bul
@@ -79,13 +78,14 @@ exports.loginBusiness = async (req, res) => {
     }
 
     // Şifre doğrulaması yap
-    console.log('Kullanıcı Şifresi:', password);
+    console.log('Kullanıcı Şifresi:', cleanedPassword);
     console.log('Hashlenmiş Şifre:', business.password);
-    const isMatch = await bcrypt.compare(password, business.password);
-    if (!isMatch) {
+    const isPasswordValid = await bcrypt.compare(cleanedPassword, business.password);
+    if (!isPasswordValid) {
       console.log('Şifre doğrulaması başarısız.');
       return res.status(401).json({ message: 'Geçersiz şifre!' });
     }
+
     console.log('Şifre doğrulaması başarılı.');
 
     // Token oluştur
@@ -99,7 +99,7 @@ exports.loginBusiness = async (req, res) => {
       message: 'Giriş başarılı!',
       token,
       role: 'business',
-      isActive: business.isActive, // İşletmenin aktiflik durumu
+      isActive: business.isActive,
       business: {
         id: business._id,
         name: business.businessName,
@@ -111,6 +111,7 @@ exports.loginBusiness = async (req, res) => {
     res.status(500).json({ message: 'Giriş sırasında bir hata oluştu!', error: error.message });
   }
 };
+
 
 /**
  * Halısaha Arama
