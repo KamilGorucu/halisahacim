@@ -2,14 +2,16 @@ const Business = require('../models/Business');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const plainPassword = "1234"; // Giriş sırasında gönderilen şifre
-const hash = "$2b$10$S2jcX6AFVao8h6Y.BuAy.OmtOG1YdGPgiB7NSyJ18oFm3eLa/nZkS"; // DB'den gelen hash
+// Test şifresi ve hash
+const password = '1234';
+const hash = '$2b$10$S2jcX6AFVao8h6Y.BuAy.OmtOG1YdGPgiB7NSyJ18oFm3eLa/nZkS';
 
-bcrypt.compare(plainPassword, hash, (err, result) => {
+bcrypt.compare(password, hash, (err, isMatch) => {
   if (err) {
-    console.error("Doğrulama hatası:", err);
+    console.error('Hata:', err);
+  } else {
+    console.log('Doğrulama Sonucu:', isMatch);
   }
-  console.log("Doğrulama Sonucu:", result); // true ya da false beklenir
 });
 
 /**
@@ -88,8 +90,8 @@ exports.loginBusiness = async (req, res) => {
     // Şifre doğrulaması yap
     console.log('Kullanıcı Şifresi:', password);
     console.log('Hashlenmiş Şifre:', business.password);
-    const isPasswordValid = await bcrypt.compare(password, business.password);
-    if (!isPasswordValid) {
+    const isMatch = await bcrypt.compare(password, business.password);
+    if (!isMatch) {
       console.log('Şifre doğrulaması başarısız.');
       return res.status(401).json({ message: 'Geçersiz şifre!' });
     }

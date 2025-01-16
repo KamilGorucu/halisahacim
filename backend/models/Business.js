@@ -26,5 +26,27 @@ const BusinessSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: false }, // Ödeme sonrası aktiflik
 });
 
+// Şifreyi kaydetmeden önce hashle
+// Şifreyi kaydetmeden önce hashle
+BusinessSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Şifreyi doğrulama metodu
+BusinessSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 BusinessSchema.index({ location: '2dsphere' }); // 2D Sphere indeks
 module.exports = mongoose.model('Business', BusinessSchema);
