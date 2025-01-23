@@ -5,29 +5,40 @@ const jwt = require('jsonwebtoken');
 /**
  * İşletme Kaydı
  */
- exports.registerBusiness = async (req, res) => {
+exports.registerBusiness = async (req, res) => {
   try {
     console.log('Gelen veri:', req.body);
 
-    // Verileri temizle ve normalize et
-    const { ownerName, businessName, email, password, location, workingHours, equipment } = req.body;
-    const parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
-    const parsedWorkingHours = typeof workingHours === 'string' ? JSON.parse(workingHours) : workingHours;
+    // Gelen verileri temizle ve parse et
+    const { ownerName, businessName, email, password, price, location, fields, equipment } = req.body;
 
-    // E-posta ve şifre gibi verileri normalize et
-    const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
-    const cleanedPassword = password.replace(/['"]+/g, '');
-    const cleanedOwnerName = ownerName.replace(/['"]+/g, '');
-    const cleanedBusinessName = businessName.replace(/['"]+/g, '');
-    const cleanedEquipment = equipment.replace(/['"]+/g, '');
+    // Gelen string verilerdeki çift tırnakları temizle
+    const cleanString = (str) => (typeof str === 'string' ? str.replace(/^"|"$/g, '').trim() : str);
 
+    const parsedLocation = typeof location === 'string' ? JSON.parse(cleanString(location)) : location;
+    const parsedFields = typeof fields === 'string' ? JSON.parse(cleanString(fields)) : fields;
+
+    // Alanları temizle
+    const cleanedOwnerName = cleanString(ownerName);
+    const cleanedBusinessName = cleanString(businessName);
+    const cleanedEmail = cleanString(email)?.toLowerCase();
+    const cleanedPassword = cleanString(password);
+    const cleanedEquipment = cleanString(equipment);
+
+    // Fotoğrafları yükle
+    const photos = req.files?.map((file) => file.path) || [];
+
+    // Tüm alanların doldurulduğundan emin olun
     if (
       !cleanedOwnerName ||
       !cleanedBusinessName ||
-      !normalizedEmail ||
+      !cleanedEmail ||
       !cleanedPassword ||
+      !price ||
+      isNaN(price) ||
       !parsedLocation.coordinates ||
-      !parsedWorkingHours
+      !parsedFields ||
+      parsedFields.length === 0
     ) {
       return res.status(400).json({ message: 'Tüm alanlar doldurulmalıdır!' });
     }
@@ -39,14 +50,16 @@ const jwt = require('jsonwebtoken');
     const newBusiness = new Business({
       ownerName: cleanedOwnerName,
       businessName: cleanedBusinessName,
-      email: normalizedEmail,
+      email: cleanedEmail,
       password: hashedPassword,
+      price: parseFloat(price),
       location: {
         city: parsedLocation.city || 'Belirtilmemiş',
         coordinates: parsedLocation.coordinates,
       },
-      workingHours: parsedWorkingHours,
+      fields: parsedFields,
       equipment: cleanedEquipment,
+      photos,
       isActive: false,
     });
 
@@ -58,17 +71,16 @@ const jwt = require('jsonwebtoken');
   }
 };
 
-
 /**
  * İşletme Girişi
  */
- exports.loginBusiness = async (req, res) => {
+exports.loginBusiness = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     // Verileri temizle ve normalize et
     const normalizedEmail = email.trim().toLowerCase().replace(/['"]+/g, '');
-    const cleanedPassword = password.replace(/['"]+/g, '');
+    const cleanedPassword = password.replace(/['"]+/g, '').trim();
     console.log('Normalized Email:', normalizedEmail);
 
     // İşletmeyi bul
@@ -112,11 +124,10 @@ const jwt = require('jsonwebtoken');
   }
 };
 
-
 /**
  * Halısaha Arama
  */
- exports.searchBusinesses = async (req, res) => {
+exports.searchBusinesses = async (req, res) => {
   const { city } = req.query;
 
   if (!city) {
@@ -130,7 +141,7 @@ const jwt = require('jsonwebtoken');
     const businesses = await Business.find({
       "location.city": { $regex: new RegExp(`^${normalizedCity}$`, 'i') },
       isActive: true,
-    }).select('businessName location workingHours');
+    }).select('businessName location fields photos price');
 
     if (businesses.length === 0) {
       return res.status(404).json({ message: 'Bu şehirde aktif işletme bulunamadı!' });

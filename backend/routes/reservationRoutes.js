@@ -4,7 +4,8 @@ const { getAvailableSlots,
         createReservation,
         getBusinessReservations, 
         approveReservation, 
-        rejectReservation 
+        rejectReservation ,
+        getWeeklyReservations
     } = require('../controllers/reservationController');
 const { protectBusiness } = require('../middleware/authMiddleware');
 
@@ -22,5 +23,7 @@ router.post('/approve', protectBusiness, approveReservation);
 
 // Rezervasyon reddetme
 router.post('/reject', protectBusiness, rejectReservation);
+
+router.get('/weekly', protectBusiness, getWeeklyReservations);
 
 module.exports = router;

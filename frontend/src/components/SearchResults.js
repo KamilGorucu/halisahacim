@@ -16,7 +16,7 @@ const SearchResults = () => {
     navigate('/available-slots', { state: { business } });
   };
 
-  if (results.length === 0) {
+  if (!results || results.length === 0) {
     return <p>Sonuç bulunamadı.</p>;
   }
 
@@ -28,6 +28,14 @@ const SearchResults = () => {
           <li key={business._id}>
             <h3>{business.businessName}</h3>
             <p>Şehir: {business.location.city}</p>
+            {business.photos && business.photos.length > 0 && (
+              <div style={{ textAlign: 'right' }}>
+                {business.photos.map((photo, index) => (
+                  <img key={index} src={`http://localhost:5002/${photo}`} alt={`${business.businessName} Fotoğrafı`} style={{ width: '100px', marginRight: '5px' }} />
+                ))}
+              </div>
+            )}
+            <p>Fiyat: {business.price ? `${business.price} TL` : 'BİLİNMİYOR'}</p>
             <p>Adres: {business.location.coordinates[1]}, {business.location.coordinates[0]}</p>
             <button onClick={() => handleSelect(business)}>Saatleri Gör</button>
           </li>
@@ -37,8 +45,8 @@ const SearchResults = () => {
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={{
-            lat: results[0].location.coordinates[1],
-            lng: results[0].location.coordinates[0],
+            lat: results[0].location.coordinates[1] || 0,
+            lng: results[0].location.coordinates[0] || 0,
           }}
           zoom={12}
         >

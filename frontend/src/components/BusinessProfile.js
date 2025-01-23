@@ -1,3 +1,4 @@
+// frontend tarafında BusinessProfile.js ve BusinessReservationTable.js dosyalarını inceleyerek businessId'nin doğru alındığından emin olun.
 import React, { useState, useEffect } from 'react';
 
 const BusinessProfile = () => {
@@ -10,15 +11,20 @@ const BusinessProfile = () => {
     fieldCount: 0, // Yeni eklenen saha sayısı
   });
   const [reservations, setReservations] = useState([]); // Rezervasyonları tutar.
+  const [weeklySlots, setWeeklySlots] = useState([]); // Haftalık görünüm için saat aralıkları
 
   useEffect(() => {
+    // console.log('Business ID from localStorage:', localStorage.getItem('businessId')); // Log ekle
+  if (!localStorage.getItem('businessId')) {
+    console.error('Business ID bulunamadı. Lütfen giriş yaptığınızdan emin olun.');
+  }
     const fetchProfile = async () => {
       try {
         const response = await fetch('http://localhost:5002/api/profile/business', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        if (!response.ok) throw new Error('Profil alınamadı.');
         const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Profil alınamadı.');
         setFormData({
           businessName: data.businessName || '',
           location: data.location || { city: '', coordinates: [] },
@@ -27,6 +33,7 @@ const BusinessProfile = () => {
           price: data.price || '',
           fieldCount: data.fieldCount || 0,
         });
+        
       } catch (error) {
         console.error('Profil alınamadı:', error);
       }
@@ -48,9 +55,51 @@ const BusinessProfile = () => {
       }
     };
 
+    const fetchWeeklySlots = async () => {
+      const businessId = localStorage.getItem('businessId');
+      if (!businessId) {
+        console.error('Business ID bulunamadığı için haftalık saatler getirilemiyor.');
+        return;
+      }
+      try {
+        const response = await fetch(
+          `http://localhost:5002/api/reservations/weekly?businessId=${localStorage.getItem(
+            'businessId'
+          )}&startDate=${getStartOfWeek()}&endDate=${getEndOfWeek()}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+        const data = await response.json();
+        // console.log('Backend Weekly Data:', data); // Gelen veriyi logla
+        if (response.ok) {
+          setWeeklySlots(data.weeklyData);
+        } else {
+          console.error('Haftalık saatler alınamadı:', data.message);
+        }
+      } catch (error) {
+        console.error('Haftalık saatler alınamadı:', error);
+      }
+    };
+
     fetchProfile();
     fetchReservations();
+    fetchWeeklySlots();
   }, []);
+
+  const getStartOfWeek = () => {
+    const now = new Date();
+    const first = now.getDate() - now.getDay() + 1;
+    return new Date(now.setDate(first)).toISOString().split('T')[0];
+  };
+
+  const getEndOfWeek = () => {
+    const now = new Date();
+    const last = now.getDate() - now.getDay() + 7;
+    return new Date(now.setDate(last)).toISOString().split('T')[0];
+  };
 
   const handleApprove = async (reservationId) => {
     try {
@@ -154,6 +203,36 @@ const BusinessProfile = () => {
         />
         <button type="submit">Güncelle</button>
       </form>
+
+      {/* Haftalık Saat Görünümü */}
+      <h2>Haftalık Rezervasyon Tablonuz</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Saat</th>
+            {weeklySlots.length > 0 &&
+              weeklySlots[0].daySlots.map((slot, index) => (
+                <th key={index}>{slot.timeSlot}</th>
+              ))}
+          </tr>
+        </thead>
+        <tbody>
+          {weeklySlots.map((day, index) => (
+            <tr key={index}>
+              <td>{new Date(day.date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</td>
+              {day.daySlots.map((slot, slotIndex) => (
+                <td
+                  key={slotIndex}
+                  style={{ backgroundColor: slot.isAvailable ? 'lightgreen' : 'lightcoral' }}
+                >
+                  {slot.isAvailable ? 'Boş' : `Dolu (${slot.user?.fullName || 'Bilinmiyor'})`}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
 
       <div>
         <h2>Rezervasyon İstekleri</h2>

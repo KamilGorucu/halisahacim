@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Düzeltildi: Doğru import.
+import { jwtDecode } from 'jwt-decode'; // Doğru import
 
 const AuthContext = createContext();
 
@@ -12,30 +12,44 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       try {
-        const decoded = jwtDecode(token); // JWT token'ı çözümle.
-        if (decoded.exp * 1000 > Date.now()) { // Token süresi kontrolü.
+        const decoded = jwtDecode(token); // JWT token'ı çözümle
+        console.log('Decoded Token in AuthProvider:', decoded); // Log ekleyelim.
+        if (decoded.exp * 1000 > Date.now()) { // Token süresi kontrolü
           if (decoded.role === 'user') {
             setUser({ id: decoded.id, email: decoded.email, role: 'user' });
           } else if (decoded.role === 'business') {
-            setBusiness({
-              id: decoded.id,
-              email: decoded.email,
-              role: 'business',
-              isActive: decoded.isActive, // İşletmenin aktif olup olmadığını kontrol et.
+            // Backend'den en güncel business bilgilerini al
+          fetch(`http://localhost:5002/api/profile/business`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              console.log('Updated Business Data:', data);
+              setBusiness({
+                id: data._id,
+                email: data.email,
+                role: 'business',
+                isActive: data.isActive, // Güncel `isActive` durumu
+              });
+              localStorage.setItem('businessId', data._id); // İşletme ID'si
+            })
+            .catch((err) => {
+              console.error('Business Fetch Error:', err);
+              logout();
             });
-          }
+        }
         } else {
-          logout(); // Token süresi dolmuşsa çıkış yap.
+          logout(); // Token süresi dolmuşsa çıkış yap
         }
       } catch (error) {
-        console.error('Token doğrulanamadı:', error); // Token hatası logla.
-        logout(); // Geçersiz token varsa çıkış yap.
+        console.error('Token doğrulanamadı:', error); // Token hatası logla
+        logout(); // Geçersiz token varsa çıkış yap
       }
     }
-  }, [token, refreshTrigger]); // `refreshTrigger` eklenerek tetikleniyor.
+  }, [token, refreshTrigger]); // `refreshTrigger` eklenerek tetikleniyor
 
   const login = (newToken, userEmail) => {
-    const decoded = jwtDecode(newToken); // Yeni token'ı çözümle.
+    const decoded = jwtDecode(newToken); // Yeni token'ı çözümle
     if (decoded.role === 'user') {
       setUser({ id: decoded.id, email: decoded.email, role: 'user' });
     } else if (decoded.role === 'business') {
@@ -43,21 +57,23 @@ export const AuthProvider = ({ children }) => {
         id: decoded.id,
         email: decoded.email,
         role: 'business',
-        isActive: decoded.isActive, // İşletmenin aktiflik durumunu kontrol et.
+        isActive: decoded.isActive, // İşletmenin aktiflik durumunu kontrol et
       });
+      localStorage.setItem('businessId', decoded.id); // İşletme ID'sini kaydet
     }
     setToken(newToken);
-    localStorage.setItem('token', newToken); // Token'ı localStorage'da sakla.
+    localStorage.setItem('token', newToken); // Token'ı localStorage'da sakla
     localStorage.setItem('email', userEmail); // E-posta saklanıyor
-    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor.
+    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor
   };
 
   const logout = () => {
-    localStorage.removeItem('token'); // Token'ı kaldır.
-    setToken(null); // Token'ı sıfırla.
-    setUser(null); // Kullanıcı bilgisini sıfırla.
-    setBusiness(null); // İşletme bilgisini sıfırla.
-    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor.
+    localStorage.removeItem('token'); // Token'ı kaldır
+    localStorage.removeItem('businessId'); // İşletme ID'sini kaldır
+    setToken(null); // Token'ı sıfırla
+    setUser(null); // Kullanıcı bilgisini sıfırla
+    setBusiness(null); // İşletme bilgisini sıfırla
+    setRefreshTrigger((prev) => !prev); // Refresh tetikleniyor
   };
 
   return (

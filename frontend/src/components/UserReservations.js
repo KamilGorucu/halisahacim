@@ -4,6 +4,7 @@ import axios from 'axios';
 const UserReservation = ({ businessId }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [timeSlots, setTimeSlots] = useState([]);
+  const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -17,6 +18,25 @@ const UserReservation = ({ businessId }) => {
       setTimeSlots(response.data.times);
     } catch (error) {
       console.error('Saatler alınırken hata oluştu:', error);
+    }
+  };
+
+  const fetchReservations = async () => {
+    try {
+      const response = await fetch('http://localhost:5002/api/reservations/user-reservations', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setReservations(data.reservations);
+      } else {
+        alert('Rezervasyonlar alınamadı.');
+      }
+    } catch (error) {
+      console.error('Rezervasyonlar alınamadı:', error);
     }
   };
 

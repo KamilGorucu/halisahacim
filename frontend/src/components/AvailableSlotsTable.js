@@ -18,7 +18,7 @@ const AvailableSlotsTable = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setSlots(data.slots); // Gelen saat aralıklarını kaydet
+        setSlots(data.availability); // Gelen saat aralıklarını kaydet
       } else {
         alert(data.message || 'Saat aralıkları alınamadı.');
       }
@@ -51,7 +51,7 @@ const AvailableSlotsTable = () => {
       });
 
       if (response.ok) {
-        alert('Rezervasyon başarıyla oluşturuldu!');
+        alert('Rezervasyon isteği başarıyla gönderildi! Mail adresinizi kontrol ediniz!');
         fetchSlots(); // Rezervasyondan sonra saat aralıklarını yenile
       } else {
         const data = await response.json();
@@ -79,35 +79,58 @@ const AvailableSlotsTable = () => {
           required
         />
       </label>
-      <h3>Saat Aralıkları</h3>
-      {slots.length > 0 ? (
-        <table border="1" style={{ width: '100%', textAlign: 'center' }}>
-          <thead>
-            <tr>
-              <th>Saat Aralığı</th>
-              <th>Durum</th>
-              <th>İşlem</th>
-            </tr>
-          </thead>
-          <tbody>
-            {slots.map((slot) => (
-              <tr key={slot.timeSlot}>
-                <td>{slot.timeSlot}</td>
-                <td>{slot.isAvailable ? 'Boş' : 'Dolu'}</td>
-                <td>
-                  {slot.isAvailable ? (
-                    <button onClick={() => handleReservation(slot.timeSlot)}>Rezervasyon Yap</button>
-                  ) : (
-                    <span>Rezervasyon Yapılamaz</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <h3>Sahalar</h3>
+      {business.fields && business.fields.length > 0 ? (
+        business.fields.map((field, index) => (
+          <div key={index}>
+            <h4>{field.name} ({field.capacity})</h4>
+            <table border="1" style={{ width: '100%', textAlign: 'center' }}>
+              <thead>
+                <tr>
+                  <th>Saat Aralığı</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {slots.map((slot) => (
+                  <tr key={slot.timeSlot}>
+                    <td>{slot.timeSlot}</td>
+                    <td>{slot.isAvailable ? 'Boş' : 'Dolu'}</td>
+                    <td>
+                      {slot.isAvailable ? (
+                        <button>Rezervasyon Yap</button>
+                      ) : (
+                        <span>Dolu</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))
       ) : (
-        <p>Seçilen tarih için saat aralığı bulunamadı.</p>
+        <p>Saha bilgisi bulunamadı.</p>
       )}
+      {/* İşletme Fotoğrafları */}
+      <div>
+        <h3>İşletme Fotoğrafları</h3>
+        {business.photos && business.photos.length > 0 ? (
+          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+            {business.photos.map((photo, index) => (
+              <img
+                key={index}
+                src={`http://localhost:5002/${photo}`}
+                alt={`${business.businessName} Fotoğrafı`}
+                style={{ width: '150px', height: '100px', objectFit: 'cover' }}
+              />
+            ))}
+          </div>
+        ) : (
+          <p>Bu işletme için fotoğraf bulunmamaktadır.</p>
+        )}
+      </div>
     </div>
   );
 };

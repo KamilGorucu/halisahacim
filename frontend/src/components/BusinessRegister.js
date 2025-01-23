@@ -14,24 +14,53 @@ const BusinessRegister = () => {
     email: '',
     password: '',
     location: { city: '', coordinates: [] },
-    workingHours: [],
+    fields: [],
     equipment: '',
     photos: [],
   });
+  const [fieldName, setFieldName] = useState(''); // Saha adı
+  const [fieldCapacity, setFieldCapacity] = useState(''); // Kaça kaç oynanacak
+  const [startHour, setStartHour] = useState(''); // Saat aralığı başlangıcı
+  const [endHour, setEndHour] = useState(''); // Saat aralığı bitişi
   const [mapPosition, setMapPosition] = useState({ lat: 41.0082, lng: 28.9784 }); // Varsayılan konum: İstanbul
-  const [startHour, setStartHour] = useState('');
-  const [endHour, setEndHour] = useState('');
   const [selectedPhotos, setSelectedPhotos] = useState([]); // Fotoğraf seçimlerini tutmak için
-  const [selectedDate, setSelectedDate] = useState(''); // Tarih seçimi
 
   const navigate = useNavigate();
 
-  const handleAddTimeSlot = () => {
-    if (startHour && endHour) {
+  // Saha ekleme
+  const handleAddField = () => {
+    if (fieldName && fieldCapacity) {
       setFormData((prevData) => ({
         ...prevData,
-        workingHours: [...prevData.workingHours, { start: startHour, end: endHour }],
+        fields: [...prevData.fields, { name: fieldName, capacity: fieldCapacity, workingHours: [] }],
       }));
+      setFieldName('');
+      setFieldCapacity('');
+    } else {
+      alert('Lütfen saha adı ve kapasitesini girin.');
+    }
+  };
+
+  /// Saat aralığı ekleme (benzersiz kontrolü ile)
+  const handleAddTimeSlot = (fieldIndex) => {
+    if (startHour && endHour) {
+      setFormData((prevData) => {
+        const updatedFields = [...prevData.fields];
+        const workingHours = updatedFields[fieldIndex].workingHours;
+
+        // Benzersiz saat aralığı kontrolü
+        const isDuplicate = workingHours.some(
+          (slot) => slot.start === startHour && slot.end === endHour
+        );
+
+        if (isDuplicate) {
+          // alert('Bu saat aralığı zaten mevcut.');
+          return prevData;
+        }
+
+        workingHours.push({ start: startHour, end: endHour });
+        return { ...prevData, fields: updatedFields };
+      });
       setStartHour('');
       setEndHour('');
     } else {
@@ -39,11 +68,13 @@ const BusinessRegister = () => {
     }
   };
 
-  const handleRemoveTimeSlot = (slot) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      workingHours: prevData.workingHours.filter((item) => item !== slot),
-    }));
+  // Saat aralığı silme (belirli saha için)
+  const handleRemoveTimeSlot = (fieldIndex, slotIndex) => {
+    setFormData((prevData) => {
+      const updatedFields = [...prevData.fields];
+      updatedFields[fieldIndex].workingHours.splice(slotIndex, 1);
+      return { ...prevData, fields: updatedFields };
+    });
   };
 
   const handleFileChange = (e) => {
@@ -82,10 +113,10 @@ const BusinessRegister = () => {
     const cleanedFormData = {
       ...formData,
       email: formData.email.trim().toLowerCase(),
-      password: formData.password.replace(/['"]+/g, ''),
-      ownerName: formData.ownerName.replace(/['"]+/g, ''),
-      businessName: formData.businessName.replace(/['"]+/g, ''),
-      equipment: formData.equipment.replace(/['"]+/g, ''),
+    password: formData.password.trim().replace(/['"]+/g, ''),
+    ownerName: formData.ownerName.trim().replace(/['"]+/g, ''),
+    businessName: formData.businessName.trim().replace(/['"]+/g, ''),
+    equipment: formData.equipment.trim().replace(/['"]+/g, ''),
     };
   
     const formDataWithPhotos = new FormData();
@@ -93,8 +124,10 @@ const BusinessRegister = () => {
     Object.keys(cleanedFormData).forEach((key) => {
       if (key === 'photos') {
         selectedPhotos.forEach((photo) => formDataWithPhotos.append('photos', photo));
-      } else {
+      } else if (typeof cleanedFormData[key] === 'object') {
         formDataWithPhotos.append(key, JSON.stringify(cleanedFormData[key]));
+      } else {
+        formDataWithPhotos.append(key, cleanedFormData[key]);
       }
     });
   
@@ -150,38 +183,70 @@ const BusinessRegister = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
         />
+        <input
+          type="number"
+          placeholder="Saatlik Ücret (TL)"
+          value={formData.price || ''}
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          required
+        />
         <textarea
           placeholder="Ekipman Bilgileri"
           value={formData.equipment}
           onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
         />
 
-        {/* Saat Aralığı Seçimi */}
-        <h3>Saat Aralıkları</h3>
+        <h3>Sahalar</h3>
         <div>
-          <label>Başlangıç Saati:</label>
           <input
-            type="time"
-            value={startHour}
-            onChange={(e) => setStartHour(e.target.value)}
+            type="text"
+            placeholder="Saha Adı(Saha 1 vb.)"
+            value={fieldName}
+            onChange={(e) => setFieldName(e.target.value)}
           />
-          <label>Bitiş Saati:</label>
           <input
-            type="time"
-            value={endHour}
-            onChange={(e) => setEndHour(e.target.value)}
+            type="text"
+            placeholder="Kaça Kaç (örn: 7'e 7)"
+            value={fieldCapacity}
+            onChange={(e) => setFieldCapacity(e.target.value)}
           />
-          <button type="button" onClick={handleAddTimeSlot}>
-            Saat Aralığı Ekle
+          <button type="button" onClick={handleAddField}>
+            Saha Ekle
           </button>
         </div>
         <ul>
-          {formData.workingHours.map((slot, index) => (
-            <li key={index}>
-              {slot.start} - {slot.end}{' '}
-              <button type="button" onClick={() => handleRemoveTimeSlot(slot)}>
-                Kaldır
-              </button>
+          {formData.fields.map((field, fieldIndex) => (
+            <li key={fieldIndex}>
+              <h4>{field.name} ({field.capacity})</h4>
+              <p>Saat Aralıkları:</p>
+              <ul>
+                {field.workingHours.map((slot, slotIndex) => (
+                  <li key={slotIndex}>
+                    {slot.start} - {slot.end}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTimeSlot(fieldIndex, slotIndex)}
+                    >
+                      Sil
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div>
+                <input
+                  type="time"
+                  value={startHour}
+                  onChange={(e) => setStartHour(e.target.value)}
+                />
+                <input
+                  type="time"
+                  value={endHour}
+                  onChange={(e) => setEndHour(e.target.value)}
+                />
+                <button type="button" onClick={() => handleAddTimeSlot(fieldIndex)}>
+                  Saat Aralığı Ekle
+                </button>
+              </div>
             </li>
           ))}
         </ul>
