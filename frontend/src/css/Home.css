@@ -1,0 +1,96 @@
+/* Home.css - Halısahacım Teması */
+
+.home-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #ffffff;
+    color: #2ecc71;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #27ae60;
+    margin-bottom: 15px;
+  }
+  
+  .intro {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2ecc71;
+    margin-top: 25px;
+  }
+  
+  .features-list {
+    list-style: none;
+    padding: 0;
+    font-size: 1.1rem;
+  }
+  
+  .features-list li {
+    background: #f1f8e9;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    color: #2c3e50;
+  }
+  
+  .advantages {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: bold;
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+  
+  .cta-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-top: 30px;
+  }
+  
+  .button-container {
+    margin-top: 20px;
+  }
+  
+  .register-button {
+    background-color: #27ae60;
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+    transition: 0.3s;
+  }
+  
+  .register-button:hover {
+    background-color: #219150;
+  }
+  
+  .user-button {
+    background-color: #16a085;
+  }
+  
+  .business-button {
+    background-color: #2980b9;
+  }
+  
+  .user-button:hover {
+    background-color: #13856d;
+  }
+  
+  .business-button:hover {
+    background-color: #1f6690;
+  }
+  

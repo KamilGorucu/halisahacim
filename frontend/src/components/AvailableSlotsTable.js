@@ -13,22 +13,28 @@ const AvailableSlotsTable = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5002/api/reservations/available-slots?businessId=${business._id}&date=${selectedDate}`
+        `http://localhost:5002/api/reservations/available-slots?businessId=${business._id}&date=${selectedDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
       );
 
       const data = await response.json();
+      console.log('API Response:', data); // Gelen veriyi kontrol etmek için log ekledik
       if (response.ok) {
-        setSlots(data.availability); // Gelen saat aralıklarını kaydet
+        setSlots(data.slots); // Gelen saat aralıklarını kaydet
       } else {
         alert(data.message || 'Saat aralıkları alınamadı.');
       }
     } catch (error) {
       console.error('Saat aralıkları alınamadı:', error);
     }
-  },[selectedDate, business._id]);
+  }, [selectedDate, business._id]);
 
   // Rezervasyon yapma işlemi
-  const handleReservation = async (timeSlot) => {
+  const handleReservation = async (fieldName, timeSlot) => {
     try {
       const response = await fetch('http://localhost:5002/api/reservations/create', {
         method: 'POST',
@@ -37,10 +43,11 @@ const AvailableSlotsTable = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({
-          userEmail: localStorage.getItem('email'), // Kullanıcı ID'sini ekleyin
+          userEmail: localStorage.getItem('email'),
           businessId: business._id,
           date: selectedDate,
           timeSlot,
+          fieldName,
         }),
       });
       console.log({
@@ -48,10 +55,11 @@ const AvailableSlotsTable = () => {
         businessId: business._id,
         date: selectedDate,
         timeSlot,
+        fieldName,
       });
 
       if (response.ok) {
-        alert('Rezervasyon isteği başarıyla gönderildi! Mail adresinizi kontrol ediniz!');
+        alert('Rezervasyon isteği başarıyla gönderildi! Mesaj kutunuzu kontrol ediniz!');
         fetchSlots(); // Rezervasyondan sonra saat aralıklarını yenile
       } else {
         const data = await response.json();
@@ -80,10 +88,10 @@ const AvailableSlotsTable = () => {
         />
       </label>
       <h3>Sahalar</h3>
-      {business.fields && business.fields.length > 0 ? (
-        business.fields.map((field, index) => (
+      {slots.length > 0 ? (
+        slots.map((field, index) => (
           <div key={index}>
-            <h4>{field.name} ({field.capacity})</h4>
+            <h4>{field.fieldName} ({field.capacity})</h4>
             <table border="1" style={{ width: '100%', textAlign: 'center' }}>
               <thead>
                 <tr>
@@ -93,13 +101,17 @@ const AvailableSlotsTable = () => {
                 </tr>
               </thead>
               <tbody>
-                {slots.map((slot) => (
-                  <tr key={slot.timeSlot}>
+                {field.timeSlots.map((slot, i) => (
+                  <tr key={i}>
                     <td>{slot.timeSlot}</td>
                     <td>{slot.isAvailable ? 'Boş' : 'Dolu'}</td>
                     <td>
-                      {slot.isAvailable ? (
-                        <button>Rezervasyon Yap</button>
+                      {slot.status === 'pending' && slot.userEmail === localStorage.getItem('email') ? (
+                        <span>Bekliyor</span>
+                      ) : slot.isAvailable ? (
+                        <button onClick={() => handleReservation(field.fieldName, slot.timeSlot)}>
+                          Rezervasyon Yap
+                        </button>
                       ) : (
                         <span>Dolu</span>
                       )}
@@ -111,7 +123,7 @@ const AvailableSlotsTable = () => {
           </div>
         ))
       ) : (
-        <p>Saha bilgisi bulunamadı.</p>
+        <p>Tarih Seçiniz.</p>
       )}
       {/* İşletme Fotoğrafları */}
       <div>

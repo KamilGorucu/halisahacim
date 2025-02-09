@@ -1,125 +1,187 @@
-// frontend tarafında BusinessProfile.js ve BusinessReservationTable.js dosyalarını inceleyerek businessId'nin doğru alındığından emin olun.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BusinessProfile = () => {
   const [formData, setFormData] = useState({
     businessName: '',
-    location: { city: '', coordinates: [] },
-    workingHours: [],
-    equipment: '',
-    price: '',
-    fieldCount: 0, // Yeni eklenen saha sayısı
+    // location: { city: '', coordinates: [] },
+    // workingHours: [],
+    // equipment: '',
+    // price: '',
+    // fieldCount: 0, // Yeni eklenen saha sayısı
+    fields: [],
   });
   const [reservations, setReservations] = useState([]); // Rezervasyonları tutar.
   const [weeklySlots, setWeeklySlots] = useState([]); // Haftalık görünüm için saat aralıkları
+  const [weekOffset, setWeekOffset] = useState(0); // Geçmiş/gelecek haftalar için kaydırma
+  // const [isActive, setIsActive] = useState(false); // İşletme aktif durumu
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // console.log('Business ID from localStorage:', localStorage.getItem('businessId')); // Log ekle
-  if (!localStorage.getItem('businessId')) {
-    console.error('Business ID bulunamadı. Lütfen giriş yaptığınızdan emin olun.');
-  }
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch('http://localhost:5002/api/profile/business', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Profil alınamadı.');
-        setFormData({
-          businessName: data.businessName || '',
-          location: data.location || { city: '', coordinates: [] },
-          workingHours: data.workingHours || [],
-          equipment: data.equipment || '',
-          price: data.price || '',
-          fieldCount: data.fieldCount || 0,
-        });
-        
-      } catch (error) {
-        console.error('Profil alınamadı:', error);
-      }
-    };
-
-    const fetchReservations = async () => {
-      try {
-        const response = await fetch(`http://localhost:5002/api/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setReservations(data.reservations);
-        } else {
-          console.error('Rezervasyonlar alınamadı:', data.message);
-        }
-      } catch (error) {
-        console.error('Rezervasyonlar alınamadı:', error);
-      }
-    };
-
-    const fetchWeeklySlots = async () => {
-      const businessId = localStorage.getItem('businessId');
-      if (!businessId) {
-        console.error('Business ID bulunamadığı için haftalık saatler getirilemiyor.');
+  const fetchProfile = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
         return;
       }
-      try {
-        const response = await fetch(
-          `http://localhost:5002/api/reservations/weekly?businessId=${localStorage.getItem(
-            'businessId'
-          )}&startDate=${getStartOfWeek()}&endDate=${getEndOfWeek()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
-        const data = await response.json();
-        // console.log('Backend Weekly Data:', data); // Gelen veriyi logla
-        if (response.ok) {
-          setWeeklySlots(data.weeklyData);
-        } else {
-          console.error('Haftalık saatler alınamadı:', data.message);
-        }
-      } catch (error) {
-        console.error('Haftalık saatler alınamadı:', error);
-      }
-    };
+      const response = await fetch('http://localhost:5002/api/profile/business', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Profil alınamadı.');
+      // setIsActive(data.isActive); // İşletme aktiflik durumunu kaydet
+      setFormData({
+        businessName: data.businessName || '',
+        // location: data.location || { city: '', coordinates: [] },
+        // workingHours: data.workingHours || [],
+        // equipment: data.equipment || '',
+        // price: data.price || '',
+        // fieldCount: data.fieldCount || 0,
+        fields: data.fields || [],
+      });
+    } catch (error) {
+      console.error('Profil alınamadı:', error);
+    }
+  },[navigate]);
 
+  const handleFieldChange = (index, key, value) => {
+    const updatedFields = [...formData.fields];
+    updatedFields[index][key] = value;
+    setFormData({ ...formData, fields: updatedFields });
+  };
+
+  const handleWorkingHoursChange = (fieldIndex, hourIndex, key, value) => {
+    const updatedFields = [...formData.fields];
+    if (!updatedFields[fieldIndex].workingHours) {
+      updatedFields[fieldIndex].workingHours = [];
+    }
+    if (!updatedFields[fieldIndex].workingHours[hourIndex]) {
+      updatedFields[fieldIndex].workingHours[hourIndex] = { start: '', end: '' };
+    }
+    updatedFields[fieldIndex].workingHours[hourIndex][key] = value;
+    setFormData({ ...formData, fields: updatedFields });
+  };
+
+  const addWorkingHour = (fieldIndex) => {
+    const updatedFields = [...formData.fields];
+    updatedFields[fieldIndex].workingHours = updatedFields[fieldIndex].workingHours || [];
+    updatedFields[fieldIndex].workingHours.push({ start: '', end: '' });
+    setFormData({ ...formData, fields: updatedFields });
+  };
+
+  const removeWorkingHour = (fieldIndex, hourIndex) => {
+    const updatedFields = [...formData.fields];
+    updatedFields[fieldIndex].workingHours.splice(hourIndex, 1);
+    setFormData({ ...formData, fields: updatedFields });
+  };
+
+  const fetchReservations = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      const response = await fetch(`http://localhost:5002/api/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setReservations(data.reservations);
+      } else {
+        console.error('Rezervasyonlar alınamadı:', data.message);
+      }
+    } catch (error) {
+      console.error('Rezervasyonlar alınamadı:', error);
+    }
+  },[navigate]);
+
+
+  const fetchWeeklySlots = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const businessId = localStorage.getItem('businessId');
+      if (!token || !businessId) {
+        navigate('/login');
+        return;
+      }
+      const startDate = getStartOfWeek(weekOffset);
+      const endDate = getEndOfWeek(weekOffset);
+      console.log("Start Date:", startDate); // Haftanın başlangıç tarihi
+      console.log("End Date:", endDate);     // Haftanın bitiş tarihi
+      const response = await fetch(
+        `http://localhost:5002/api/reservations/weekly?businessId=${businessId}&startDate=${startDate}&endDate=${endDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setWeeklySlots(data.weeklyData || []);
+      } else {
+        console.error('Haftalık veriler alınamadı:', data.message);
+      }
+    } catch (error) {
+      console.error('Haftalık veriler alınamadı:', error);
+    }
+  },[weekOffset, navigate]);
+  
+  useEffect(() => {
+    if (!localStorage.getItem('businessId')) {
+      console.error('Business ID bulunamadı. Lütfen giriş yaptığınızdan emin olun.');
+      navigate('/login'); // Giriş yapılmamışsa yönlendirme
+      return;
+    }
     fetchProfile();
     fetchReservations();
     fetchWeeklySlots();
-  }, []);
+  }, [fetchProfile,fetchReservations,fetchWeeklySlots]);
 
-  const getStartOfWeek = () => {
+  const getStartOfWeek = (offset = 0) => {
     const now = new Date();
-    const first = now.getDate() - now.getDay() + 1;
-    return new Date(now.setDate(first)).toISOString().split('T')[0];
+    const monday = new Date(now.setDate(now.getDate() - now.getDay() + 2 + offset * 7));
+    monday.setHours(0, 0, 0, 0);
+    return monday.toISOString().split('T')[0];
+  };
+  
+  const getEndOfWeek = (offset = 0) => {
+    const monday = new Date(getStartOfWeek(offset));
+    const sunday = new Date(monday.setDate(monday.getDate() + 6));
+    sunday.setHours(23, 59, 59, 999);
+    return sunday.toISOString().split('T')[0];
+  };
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Geçersiz Tarih';
+    const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', options); // Türkçe formatta döndür
   };
 
-  const getEndOfWeek = () => {
-    const now = new Date();
-    const last = now.getDate() - now.getDay() + 7;
-    return new Date(now.setDate(last)).toISOString().split('T')[0];
+  const handleWeekChange = (direction) => {
+    setWeekOffset((prev) => prev + direction);
   };
 
   const handleApprove = async (reservationId) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
       const response = await fetch('http://localhost:5002/api/reservations/approve', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
       });
       if (response.ok) {
         alert('Rezervasyon onaylandı!');
-        setReservations((prev) =>
-          prev.map((res) =>
-            res._id === reservationId ? { ...res, status: 'approved' } : res
-          )
-        );
+        fetchReservations(); // Listeyi güncelle
       } else {
-        console.error('Rezervasyon onaylanamadı.');
+        const data = await response.json();
+        alert(data.message || 'Rezervasyon onaylanamadı.');
       }
     } catch (error) {
       console.error('Rezervasyon onaylanamadı:', error);
@@ -128,23 +190,23 @@ const BusinessProfile = () => {
 
   const handleReject = async (reservationId) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
       const response = await fetch('http://localhost:5002/api/reservations/reject', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
       });
+  
       if (response.ok) {
         alert('Rezervasyon reddedildi!');
-        setReservations((prev) =>
-          prev.map((res) =>
-            res._id === reservationId ? { ...res, status: 'rejected' } : res
-          )
-        );
+        fetchReservations(); // Listeyi güncelle
       } else {
-        console.error('Rezervasyon reddedilemedi.');
+        const data = await response.json();
+        alert(data.message || 'Rezervasyon reddedilemedi.');
       }
     } catch (error) {
       console.error('Rezervasyon reddedilemedi:', error);
@@ -154,7 +216,7 @@ const BusinessProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5002/api/profile/business/update', {
+      const response = await fetch('http://localhost:5002/api/business/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -175,65 +237,123 @@ const BusinessProfile = () => {
 
   return (
     <div>
+      <h2>İşletme Profilimi Güncelle</h2>
       <form onSubmit={handleSubmit}>
-        <h2>İşletme Profilimi Güncelle</h2>
-        <input
-          type="text"
-          placeholder="İşletme Adı"
-          value={formData.businessName}
-          onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-          required
-        />
-        <textarea
-          placeholder="Ekipman Bilgileri"
-          value={formData.equipment}
-          onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
-        />
-        <input
-          type="number"
-          placeholder="Saha Sayısı"
-          value={formData.fieldCount}
-          onChange={(e) => setFormData({ ...formData, fieldCount: e.target.value })}
-        />
-        <input
-          type="number"
-          placeholder="Fiyat"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-        />
+        {formData.fields.map((field, index) => (
+          <div key={index}>
+            <label>
+              Saha Adı:
+              <input
+                type="text"
+                value={field.name}
+                onChange={(e) => handleFieldChange(index, 'name', e.target.value)}
+              />
+            </label>
+            <label>
+              Kapasite:
+              <input
+                type="text"
+                value={field.capacity}
+                onChange={(e) => handleFieldChange(index, 'capacity', e.target.value)}
+              />
+            </label>
+            <label>
+              Fiyat:
+              <input
+                type="number"
+                value={field.price}
+                onChange={(e) => handleFieldChange(index, 'price', e.target.value)}
+              />
+            </label>
+            {field.workingHours.map((hour, hourIndex) => (
+              <div key={hourIndex}>
+                <label>
+                  Başlangıç Saati:
+                  <input
+                    type="text"
+                    value={hour.start || ''}
+                    onChange={(e) =>
+                      handleWorkingHoursChange(index, hourIndex, 'start', e.target.value)
+                    }
+                  />
+                </label>
+                <label>
+                  Bitiş Saati:
+                  <input
+                    type="text"
+                    value={hour.end || ''}
+                    onChange={(e) =>
+                      handleWorkingHoursChange(index, hourIndex, 'end', e.target.value)
+                    }
+                  />
+                </label>
+                <button type="button" onClick={() => removeWorkingHour(index, hourIndex)}>
+                  Sil
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={() => addWorkingHour(index)}>
+              Ekle
+            </button>
+          </div>
+        ))}
         <button type="submit">Güncelle</button>
       </form>
 
-      {/* Haftalık Saat Görünümü */}
-      <h2>Haftalık Rezervasyon Tablonuz</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Saat</th>
-            {weeklySlots.length > 0 &&
-              weeklySlots[0].daySlots.map((slot, index) => (
-                <th key={index}>{slot.timeSlot}</th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
-          {weeklySlots.map((day, index) => (
-            <tr key={index}>
-              <td>{new Date(day.date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</td>
-              {day.daySlots.map((slot, slotIndex) => (
-                <td
-                  key={slotIndex}
-                  style={{ backgroundColor: slot.isAvailable ? 'lightgreen' : 'lightcoral' }}
-                >
-                  {slot.isAvailable ? 'Boş' : `Dolu (${slot.user?.fullName || 'Bilinmiyor'})`}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-
+      <h2>Haftalık Rezervasyon Tabloları</h2>
+        <div>
+          <button onClick={() => handleWeekChange(-1)}>Önceki Hafta</button>
+          <button onClick={() => handleWeekChange(1)}>Sonraki Hafta</button>
+        </div>
+        {weeklySlots.length > 0 ? (
+          weeklySlots.map((field, fieldIndex) => (
+            <div key={fieldIndex}>
+              <h3>{field.fieldName} - Kapasite: {field.capacity}</h3>
+              <table border="1" style={{ width: '100%', textAlign: 'center', marginBottom: '20px' }}>
+                <thead>
+                  <tr>
+                    <th>Tarih</th>
+                    {field.weeklyData[0]?.daySlots?.map((slot, index) => (
+                      <th key={index}>{slot.timeSlot || "Saat Yok"}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                {field.weeklyData.map((day, index) => (
+                  <tr key={index}>
+                    <td>{formatDate(day.date)}</td>
+                    {day.daySlots?.map((slot, slotIndex) => (
+                      <td
+                        key={slotIndex}
+                        style={{
+                          backgroundColor:
+                            slot.status === 'approved'
+                              ? 'red' // Onaylananlar kırmızı
+                              : slot.status === 'rejected'
+                              ? 'white' // Reddedilenler beyaz
+                              : slot.status === 'pending'
+                              ? 'green' // Bekleyenler yeşil
+                              : 'white', // Varsayılan beyaz
+                        }}
+                      >
+                        {slot.status === 'approved' && slot.user ? (
+                          <span>{slot.user.fullName}</span> // Kullanıcı adı
+                        ) : slot.status === 'pending' ? (
+                          'Bekliyor'
+                        ) : (
+                          'Boş'
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+              </table>
+            </div>
+          ))
+        ) : (
+          <p>Henüz veri bulunmamaktadır.</p>
+        )}
       <div>
         <h2>Rezervasyon İstekleri</h2>
         {reservations.length === 0 ? (
@@ -246,7 +366,10 @@ const BusinessProfile = () => {
                   <strong>Kullanıcı:</strong> {res.user.fullName} ({res.user.email})
                 </p>
                 <p>
-                  <strong>Tarih:</strong> {res.date}
+                <strong>Halı Saha:</strong> {res.fieldName}
+                </p>
+                <p>
+                  <strong>Tarih:</strong> {formatDate(res.date)}
                 </p>
                 <p>
                   <strong>Saat:</strong> {res.timeSlot}

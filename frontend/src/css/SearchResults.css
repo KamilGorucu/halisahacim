@@ -1,0 +1,231 @@
+/* Genel Konteyner */
+.search-results-container {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 1200px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Başlık */
+  .search-results-title {
+    font-size: 28px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* İşletme Listesi */
+  .business-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+  }
+  
+  /* İşletme Elemanı */
+  .business-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .business-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* İşletme Bilgisi */
+  .business-info {
+    margin-bottom: 10px;
+  }
+  
+  .business-name {
+    font-size: 22px;
+    color: #2E7D32;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .business-city,
+  .business-address,
+  .business-equipment {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  .business-fields-title {
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0 5px;
+  }
+  
+  .business-fields-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .business-field-item {
+    font-size: 14px;
+    color: #444;
+  }
+  
+  /* Fotoğraf */
+  .business-photos {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  
+  .business-photo {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .business-photo:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Ortalama Puan */
+  .business-rating {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  
+  .star {
+    font-size: 20px;
+    color: #ddd;
+  }
+  
+  .star.filled {
+    color: #FFD700;
+  }
+  
+  /* Yorumlar */
+  .business-comments {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .business-comment-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .business-comment-item:last-child {
+    border-bottom: none;
+  }
+  
+  .comment {
+    font-size: 14px;
+    color: #333;
+  }
+  
+  /* Butonlar */
+  .view-slots-button,
+  .add-comment-button,
+  .toggle-comments-button,
+  .submit-rating-button {
+    padding: 10px 15px;
+    margin: 5px 5px 0 0;
+    font-size: 14px;
+    background-color: #2E7D32;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .view-slots-button:hover,
+  .add-comment-button:hover,
+  .toggle-comments-button:hover,
+  .submit-rating-button:hover {
+    background-color: #FFD700;
+    color: #333;
+  }
+  
+  /* Yorum Formu */
+  .add-rating-form {
+    margin-top: 15px;
+  }
+  
+  .rating-input,
+  .comment-textarea {
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .comment-textarea {
+    resize: none;
+  }
+  
+  /* Harita */
+  .map-container {
+    width: 100%;
+    height: 250px;
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Modal (Büyük Fotoğraf) */
+  .photo-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .photo-modal-content {
+    position: relative;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 90%;
+  }
+  
+  .photo-modal-content img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+  }
+  

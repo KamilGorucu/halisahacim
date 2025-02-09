@@ -67,13 +67,15 @@ exports.createPayment = async (req, res) => {
 
     iyzipay.payment.create(request, async (err, result) => {
       if (err || result.status !== 'success') {
-        console.error('Ödeme hatası:', err || result);
-        return res.status(500).json({ message: 'Ödeme başarısız oldu.', error: result?.errorMessage || err.message });
+        return res.status(500).json({ message: 'Ödeme başarısız oldu.' });
       }
-
-      await Business.findByIdAndUpdate(businessId, { isActive: true });
-      console.log('Ödeme başarılı:', result);
-      res.status(200).json({ message: 'Ödeme başarılı!', paymentId: result.paymentId });
+  
+      await Business.findByIdAndUpdate(businessId, {
+        isActive: true,
+        nextPaymentDate: new Date(new Date().setDate(new Date().getDate() + 30)), // 30 gün ileri
+      });
+  
+      res.status(200).json({ message: 'Ödeme başarılı!' });
     });
   } catch (error) {
     console.error('Sunucu hatası:', error);

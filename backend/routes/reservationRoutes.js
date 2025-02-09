@@ -7,13 +7,13 @@ const { getAvailableSlots,
         rejectReservation ,
         getWeeklyReservations
     } = require('../controllers/reservationController');
-const { protectBusiness } = require('../middleware/authMiddleware');
+const { protect, protectBusiness } = require('../middleware/authMiddleware');
 
 // Kullanıcı için uygun saatleri getirme
-router.get('/available-slots', getAvailableSlots);
+router.get('/available-slots', protect, getAvailableSlots);
 
 // Rezervasyon oluşturma rotası
-router.post('/create', createReservation);
+router.post('/create', protect, createReservation);
 
 // İşletme rezervasyonlarını listeleme (Sadece işletmeler için erişim)
 router.get('/business-reservations', protectBusiness, getBusinessReservations);

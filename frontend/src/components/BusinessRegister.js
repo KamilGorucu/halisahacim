@@ -20,6 +20,7 @@ const BusinessRegister = () => {
   });
   const [fieldName, setFieldName] = useState(''); // Saha adı
   const [fieldCapacity, setFieldCapacity] = useState(''); // Kaça kaç oynanacak
+  const [fieldPrice, setFieldPrice] = useState(''); // Fiyat alanı eklendi
   const [startHour, setStartHour] = useState(''); // Saat aralığı başlangıcı
   const [endHour, setEndHour] = useState(''); // Saat aralığı bitişi
   const [mapPosition, setMapPosition] = useState({ lat: 41.0082, lng: 28.9784 }); // Varsayılan konum: İstanbul
@@ -29,15 +30,16 @@ const BusinessRegister = () => {
 
   // Saha ekleme
   const handleAddField = () => {
-    if (fieldName && fieldCapacity) {
+    if (fieldName && fieldCapacity && fieldPrice) {
       setFormData((prevData) => ({
         ...prevData,
-        fields: [...prevData.fields, { name: fieldName, capacity: fieldCapacity, workingHours: [] }],
+        fields: [...prevData.fields, { name: fieldName, capacity: fieldCapacity, price: fieldPrice, workingHours: [] }],
       }));
       setFieldName('');
       setFieldCapacity('');
+      setFieldPrice('');
     } else {
-      alert('Lütfen saha adı ve kapasitesini girin.');
+      alert('Lütfen saha adı, kapasite ve fiyatı girin.');
     }
   };
 
@@ -139,7 +141,7 @@ const BusinessRegister = () => {
   
       const data = await response.json();
       if (response.ok) {
-        alert('İşletme kaydı başarılı! Ödeme sayfasına yönlendiriliyorsunuz.');
+        alert('İşletme kaydı başarılı!');
         navigate('/payment');
       } else {
         alert(data.message);
@@ -183,13 +185,6 @@ const BusinessRegister = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
         />
-        <input
-          type="number"
-          placeholder="Saatlik Ücret (TL)"
-          value={formData.price || ''}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          required
-        />
         <textarea
           placeholder="Ekipman Bilgileri"
           value={formData.equipment}
@@ -210,6 +205,12 @@ const BusinessRegister = () => {
             value={fieldCapacity}
             onChange={(e) => setFieldCapacity(e.target.value)}
           />
+          <input
+            type="number"
+            placeholder="Saatlik Ücret"
+            value={fieldPrice}
+            onChange={(e) => setFieldPrice(e.target.value)}
+          />
           <button type="button" onClick={handleAddField}>
             Saha Ekle
           </button>
@@ -218,6 +219,7 @@ const BusinessRegister = () => {
           {formData.fields.map((field, fieldIndex) => (
             <li key={fieldIndex}>
               <h4>{field.name} ({field.capacity})</h4>
+              <p>Fiyat: {field.price} TL</p>
               <p>Saat Aralıkları:</p>
               <ul>
                 {field.workingHours.map((slot, slotIndex) => (

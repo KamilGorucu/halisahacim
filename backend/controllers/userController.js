@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const verifyRecaptcha = require('../middleware/recaptchaMiddleware');
 
 exports.registerUser = async (req, res) => {
   const { fullName, email, password, phone, teams, position } = req.body;
@@ -27,7 +28,6 @@ exports.registerUser = async (req, res) => {
     res.status(500).json({ message: 'Kayıt başarısız!', error: error.message });
   }
 };
-
 
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;

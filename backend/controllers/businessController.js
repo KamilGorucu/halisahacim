@@ -1,7 +1,7 @@
 const Business = require('../models/Business');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const verifyRecaptcha = require('../middleware/recaptchaMiddleware');
 /**
  * İşletme Kaydı
  */
@@ -10,7 +10,7 @@ exports.registerBusiness = async (req, res) => {
     console.log('Gelen veri:', req.body);
 
     // Gelen verileri temizle ve parse et
-    const { ownerName, businessName, email, password, price, location, fields, equipment } = req.body;
+    const { ownerName, businessName, email, password, location, fields, equipment } = req.body;
 
     // Gelen string verilerdeki çift tırnakları temizle
     const cleanString = (str) => (typeof str === 'string' ? str.replace(/^"|"$/g, '').trim() : str);
@@ -34,8 +34,6 @@ exports.registerBusiness = async (req, res) => {
       !cleanedBusinessName ||
       !cleanedEmail ||
       !cleanedPassword ||
-      !price ||
-      isNaN(price) ||
       !parsedLocation.coordinates ||
       !parsedFields ||
       parsedFields.length === 0
@@ -52,7 +50,6 @@ exports.registerBusiness = async (req, res) => {
       businessName: cleanedBusinessName,
       email: cleanedEmail,
       password: hashedPassword,
-      price: parseFloat(price),
       location: {
         city: parsedLocation.city || 'Belirtilmemiş',
         coordinates: parsedLocation.coordinates,
@@ -60,7 +57,8 @@ exports.registerBusiness = async (req, res) => {
       fields: parsedFields,
       equipment: cleanedEquipment,
       photos,
-      isActive: false,
+      isActive: true,
+      nextPaymentDate: new Date(new Date().setDate(new Date().getDate() + 30)), // İlk ödeme tarihi
     });
 
     await newBusiness.save();
@@ -102,7 +100,11 @@ exports.loginBusiness = async (req, res) => {
 
     // Token oluştur
     const token = jwt.sign(
-      { id: business._id, email: business.email, role: 'business' },
+      { id: business._id, 
+        email: business.email, 
+        role: 'business',
+        isActive: business.isActive, // isActive burada encode edilmeli 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -141,7 +143,12 @@ exports.searchBusinesses = async (req, res) => {
     const businesses = await Business.find({
       "location.city": { $regex: new RegExp(`^${normalizedCity}$`, 'i') },
       isActive: true,
-    }).select('businessName location fields photos price');
+    }).select('businessName location fields photos equipment price ratings averageRating')
+    .populate({
+      path: 'ratings.user',
+      select: 'fullName email',
+      options: { limit: 3 },
+    });
 
     if (businesses.length === 0) {
       return res.status(404).json({ message: 'Bu şehirde aktif işletme bulunamadı!' });
@@ -155,13 +162,43 @@ exports.searchBusinesses = async (req, res) => {
 };
 
 /**
+ * İşletme Detaylarını Güncelle (Saha bilgileri + Çalışma Saatleri)
+ */
+ exports.updateBusinessDetails = async (req, res) => {
+  try {
+    const businessId = req.businessId;
+    const { fields } = req.body;
+
+    if (!fields || !Array.isArray(fields)) {
+      return res.status(400).json({ message: 'Saha bilgileri gerekli.' });
+    }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı.' });
+    }
+
+    // Güncellenmiş saha bilgilerini kaydet
+    business.fields = fields;
+
+    await business.save();
+    res.status(200).json({ message: 'İşletme detayları güncellendi.', business });
+  } catch (error) {
+    console.error('Hata (updateBusinessDetails):', error.message);
+    res.status(500).json({ message: 'İşletme detayları güncellenemedi.', error });
+  }
+};
+
+/**
  * İşletme Detayı Getir
  */
 exports.getBusinessById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const business = await Business.findById(id);
+    const business = await Business.findById(id)
+      .populate('ratings.user', 'fullName email'); // Kullanıcı adını yorumlarla beraber getir
+
     if (!business) {
       return res.status(404).json({ message: 'İşletme bulunamadı!' });
     }
@@ -193,3 +230,47 @@ exports.uploadPhoto = (req, res) => {
   }
   res.status(200).json({ filePath: req.file.path });
 };
+
+/**
+ * İşletmeye Yorum ve Puan Ekleme
+ */
+ exports.addRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, comment } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Geçerli bir puan girin (1-5 arası).' });
+    }
+
+    const business = await Business.findById(id);
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı.' });
+    }
+
+    // Kullanıcı doğrulaması
+    if (!req.user) {
+      return res.status(401).json({ message: 'Yetkisiz erişim, kullanıcı doğrulanamadı.' });
+    }
+
+    // Yorum ve puan ekle
+    business.ratings.push({
+      user: req.user._id, // Kullanıcının ID'sini buraya ekle
+      rating,
+      comment,
+    });
+
+    // Ortalama puanı yeniden hesapla
+    const totalRatings = business.ratings.length;
+    const averageRating = business.ratings.reduce((sum, rating) => sum + rating.rating, 0) / totalRatings;
+    business.averageRating = averageRating;
+
+    await business.save();
+
+    res.status(200).json({ message: 'Yorum ve puan başarıyla eklendi.', business });
+  } catch (error) {
+    console.error('Puan ve yorum ekleme hatası:', error);
+    res.status(500).json({ message: 'Yorum ve puan eklenemedi.', error: error.message });
+  }
+};
+

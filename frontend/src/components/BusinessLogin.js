@@ -8,7 +8,7 @@ const BusinessLogin = () => {
     password: '',
   });
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // Giriş işlemi için AuthContext'ten `login` fonksiyonunu al.
+  const { login, setBusiness } = useContext(AuthContext); // Giriş işlemi için AuthContext'ten `login` fonksiyonunu al.
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +26,11 @@ const BusinessLogin = () => {
       const data = await response.json();
       if (response.ok) {
         login(data.token);
+        setBusiness({
+          id: data.business.id,
+          email: data.business.email,
+          isActive: data.isActive, // Burada `isActive` güncellendi.
+        });
         if (!data.isActive) {
           alert('Ödemeniz gerçekleşmeden işletmeniz aktif olmayacaktır. Ödeme sayfasına yönlendiriliyorsunuz.');
           navigate('/payment');

@@ -9,10 +9,15 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password'); // Kullanıcı bilgileri
+
+      const user = await User.findById(decoded.id).select('-password');
+      if (!user) {
+        return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
+      }
+
+      req.user = user;
       next();
     } catch (error) {
-      console.error('Token doğrulama hatası:', error.message);
       res.status(401).json({ message: 'Yetkisiz erişim, token doğrulanamadı.' });
     }
   } else {
@@ -30,37 +35,41 @@ const protectBusiness = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded Token:', decoded); // Log ekleyin.
     if (decoded.role !== 'business') {
       console.error('Yetkisiz erişim: Sadece işletmeler giriş yapabilir.');
       return res.status(403).json({ message: 'Erişim yetkisi yok! Sadece işletmeler giriş yapabilir.' });
     }
 
-    // İşletmeyi veritabanından kontrol et
     const business = await Business.findById(decoded.id);
-    console.log('Fetched Business:', business); // İşletme bilgisi kontrol ediliyor.
     if (!business) {
       console.error(`İşletme bulunamadı: ${decoded.id}`);
       return res.status(404).json({ message: 'İşletme bulunamadı.' });
     }
+    // Ödeme tarihi kontrolü
+    const today = new Date();
+    if (business.nextPaymentDate && business.nextPaymentDate < today) {
+      business.isActive = false;
+      await business.save();
+    }
+    if (business.nextPaymentDate < today) {
+      business.isActive = false;
+      await business.save();
+    }
 
-    // İşletme aktif değilse yönlendirme yapılır
     if (!business.isActive) {
-      console.warn('İşletme aktif değil:', business.isActive);
       return res.status(403).json({
         redirect: '/payment',
         message: 'Ödeme yapılmadan işletme aktif edilemez. Lütfen ödeme yapın.',
       });
     }
 
-    req.businessId = decoded.id; // Token içindeki işletme kimliğini req'e ekleyin
-    console.log('Middleware Business ID:', req.businessId);
+    req.businessId = decoded.id;
+    req.business = business;
     next();
   } catch (error) {
     console.error('Yetkilendirme hatası:', error.message);
     res.status(401).json({ message: 'Yetkilendirme hatası. Geçersiz veya süresi dolmuş token.' });
   }
 };
-
 
 module.exports = { protect, protectBusiness };

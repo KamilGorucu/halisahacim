@@ -1,0 +1,129 @@
+/* Genel Navbar Ayarları */
+.navbar {
+    background-color: #2E7D32; /* Yeşil */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  .menu {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .menu-item {
+    position: relative;
+    margin: 0 15px; /* Daha dengeli aralık */
+  }
+  
+  .menu-item.left {
+    margin-right: auto; /* Sol tarafa yapışır */
+  }
+  
+  .menu-item a,
+  .menu-item span {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .menu-item a:hover,
+  .menu-item span:hover {
+    color: #FFD700; /* Altın rengi hover */
+  }
+  
+  /* Dropdown Menü Ayarları */
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background-color: #1B5E20; /* Daha koyu yeşil */
+    list-style: none;
+    margin: 0;
+    padding: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+  
+  .menu-item.dropdown .dropdown-menu {
+    display: block;
+  }
+  
+  .dropdown-menu li {
+    padding: 5px 15px;
+  }
+  
+  .dropdown-menu li a {
+    color: white;
+    font-size: 14px;
+    display: block;
+    text-decoration: none;
+  }
+  
+  .dropdown-menu li a:hover {
+    background-color: #FFD700;
+    color: black;
+    border-radius: 3px;
+  }
+  
+  /* Footer Stilleri */
+  footer {
+    background-color: #1B5E20; /* Daha koyu yeşil */
+    color: white;
+    text-align: center;
+    padding: 5px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 12px;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  footer a {
+    color: #FFD700; /* Altın rengi */
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 10px;
+  }
+  
+  footer a:hover {
+    text-decoration: underline;
+  }
+  
+  footer p {
+    margin: 5px 0;
+  }
+  
+  /* Footer Kaybolma */
+  footer.hidden {
+    opacity: 0;
+    pointer-events: none; /* Tıklanmayı engeller */
+  }
+  
+  /* Responsive Ayarlar */
+  @media (max-width: 768px) {
+    .menu {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .menu-item {
+      margin-bottom: 10px;
+    }
+  
+    .dropdown-menu {
+      position: static;
+      box-shadow: none;
+    }
+  }
+  
