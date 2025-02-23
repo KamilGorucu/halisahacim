@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/SearchForm.css'
 
 const SearchForm = () => {
   const [city, setCity] = useState('');
@@ -24,20 +25,21 @@ const SearchForm = () => {
   };
 
   return (
-    <div>
-      <h2>Halısaha Ara</h2>
-      <p>Lütfen şehir adını girerek halısahaları arayın. Şehir adının baş harfi büyük olmalıdır.</p>
-      <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          placeholder="Şehir Adı (Örn: İstanbul)"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          required
-        />
-        <button type="submit">Ara</button>
-      </form>
-    </div>
+    <div className="search-form-container">
+    <h2 className="search-form-title">Halısaha Ara</h2>
+    <p className="search-form-description">Lütfen şehir adını girerek halısahaları arayın. Şehir adının baş harfi büyük olmalıdır.</p>
+    <form className="search-form" onSubmit={handleSearch}>
+      <input
+        type="text"
+        className="search-input"
+        placeholder="Şehir Adı (Örn: İstanbul)"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        required
+      />
+      <button type="submit" className="search-button">Ara</button>
+    </form>
+  </div>
   );
 };
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import Recaptcha from './Recaptcha';
+import '../css/BusinessRegister.css'
 
 const containerStyle = {
-  width: '30%',
+  width: '100%',
   height: '300px',
 };
 
@@ -25,7 +27,7 @@ const BusinessRegister = () => {
   const [endHour, setEndHour] = useState(''); // Saat aralığı bitişi
   const [mapPosition, setMapPosition] = useState({ lat: 41.0082, lng: 28.9784 }); // Varsayılan konum: İstanbul
   const [selectedPhotos, setSelectedPhotos] = useState([]); // Fotoğraf seçimlerini tutmak için
-
+  // const [recaptchaToken, setRecaptchaToken] = useState('');
   const navigate = useNavigate();
 
   // Saha ekleme
@@ -110,6 +112,10 @@ const BusinessRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // if (!recaptchaToken) {
+    //   alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
+    //   return;
+    // }
   
     // Form verilerini normalize et
     const cleanedFormData = {
@@ -153,9 +159,9 @@ const BusinessRegister = () => {
   };  
 
   return (
-    <div>
+    <div className="business-register-container">
       <h2>İşletme Kayıt</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="business-register-form">
         {/* İşletme Bilgileri */}
         <input
           type="text"
@@ -163,6 +169,7 @@ const BusinessRegister = () => {
           value={formData.ownerName}
           onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
           required
+          className="input-field"
         />
         <input
           type="text"
@@ -170,6 +177,7 @@ const BusinessRegister = () => {
           value={formData.businessName}
           onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
           required
+          className="input-field"
         />
         <input
           type="email"
@@ -177,6 +185,7 @@ const BusinessRegister = () => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
+          className="input-field"
         />
         <input
           type="password"
@@ -184,68 +193,76 @@ const BusinessRegister = () => {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
+          className="input-field"
         />
         <textarea
           placeholder="Ekipman Bilgileri"
           value={formData.equipment}
           onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
+          className="textarea-field"
         />
 
         <h3>Sahalar</h3>
-        <div>
+        <div className='field-container'>
           <input
             type="text"
-            placeholder="Saha Adı(Saha 1 vb.)"
+            placeholder="Saha Adı(Kaç adet saha varsa Saha1 vb.)"
             value={fieldName}
             onChange={(e) => setFieldName(e.target.value)}
-          />
+            className="input-field"
+            />
           <input
             type="text"
             placeholder="Kaça Kaç (örn: 7'e 7)"
             value={fieldCapacity}
             onChange={(e) => setFieldCapacity(e.target.value)}
+            className="input-field"
           />
           <input
             type="number"
             placeholder="Saatlik Ücret"
             value={fieldPrice}
             onChange={(e) => setFieldPrice(e.target.value)}
+            className="input-field"
           />
-          <button type="button" onClick={handleAddField}>
+          <button type="button" onClick={handleAddField} className="add-field-button">
             Saha Ekle
           </button>
         </div>
-        <ul>
+        <ul className='field-list'>
           {formData.fields.map((field, fieldIndex) => (
-            <li key={fieldIndex}>
-              <h4>{field.name} ({field.capacity})</h4>
-              <p>Fiyat: {field.price} TL</p>
-              <p>Saat Aralıkları:</p>
-              <ul>
+            <li key={fieldIndex} className="field-item">
+              <h4 className='field-name'>{field.name} ({field.capacity})</h4>
+              <p className='field-price'>Fiyat: {field.price} TL</p>
+              <p className='field-hours-title'>Saat Aralıkları:</p>
+              <ul className='time-slot-list'>
                 {field.workingHours.map((slot, slotIndex) => (
-                  <li key={slotIndex}>
+                  <li key={slotIndex} className="time-slot-item">
                     {slot.start} - {slot.end}
                     <button
                       type="button"
                       onClick={() => handleRemoveTimeSlot(fieldIndex, slotIndex)}
+                      className="delete-time-slot"
                     >
                       Sil
                     </button>
                   </li>
                 ))}
               </ul>
-              <div>
+              <div className='time-slot-inputs'>
                 <input
                   type="time"
                   value={startHour}
                   onChange={(e) => setStartHour(e.target.value)}
+                  className="time-input"
                 />
                 <input
                   type="time"
                   value={endHour}
                   onChange={(e) => setEndHour(e.target.value)}
+                  className="time-input"
                 />
-                <button type="button" onClick={() => handleAddTimeSlot(fieldIndex)}>
+                <button type="button" onClick={() => handleAddTimeSlot(fieldIndex)} className="add-time-slot">
                   Saat Aralığı Ekle
                 </button>
               </div>
@@ -255,7 +272,7 @@ const BusinessRegister = () => {
 
         {/* Fotoğraf Yükleme */}
         <h3>Fotoğraflar</h3>
-        <input type="file" multiple onChange={handleFileChange} />
+        <input type="file" multiple onChange={handleFileChange} className="field-input" />
 
         {/* Harita */}
         <h3>Harita Üzerinden Konum Belirle</h3>
@@ -268,7 +285,8 @@ const BusinessRegister = () => {
           Seçilen Konum: Lat: {formData.location.coordinates[1] || '-'}, Lng: {formData.location.coordinates[0] || '-'}
         </p>
         <p>Şehir: {formData.location.city || 'Belirtilmemiş'}</p>
-        <button type="submit">Kaydet</button>
+        {/* <Recaptcha onVerify={(token) => setRecaptchaToken(token)} /> */}
+        <button type="submit" className='submit-button'>Kaydet</button>
       </form>
     </div>
   );

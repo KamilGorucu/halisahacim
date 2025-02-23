@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import ChatBox from './ChatBox';
 import CitySelector from './CitySelector';
+import AuthContext from '../contexts/AuthContext';
+import '../css/OpponentRequests.css';
 
 const OpponentRequests = () => {
+  const { user } = useContext(AuthContext);
   const [selectedCity, setSelectedCity] = useState('');
   const [requests, setRequests] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -26,29 +30,50 @@ const OpponentRequests = () => {
   }, [selectedCity]);
 
   return (
-    <div>
-    <h2>Rakip Bulma Talepleri</h2>
-    <CitySelector selectedCity={selectedCity} setSelectedCity={setSelectedCity} />
-    <ul>
-      {selectedCity && requests.length > 0 ? (
-        requests.map((req) => (
-          <li key={req._id}>
-            <strong>Takım Boyutu:</strong> {req.teamSize} <br />
-            <strong>Açıklama:</strong> {req.description || 'Belirtilmemiş'} <br />
-            <strong>Kullanıcı:</strong> {req.user.fullName} <br />
-            <button onClick={() => setActiveChat({ id: req.user._id, model: 'User' })}>
-              Mesajlaş
-            </button>
-          </li>
-        ))
-      ) : selectedCity ? (
-        <p>Bu şehirde henüz rakip bulma talebi yok.</p>
-      ) : (
-        <p>Lütfen bir şehir seçin.</p>
-      )}
-    </ul>
+    <div className="opponent-container">
+      <h2 className="opponent-title">🏆 Rakip Arayanlar</h2>
+      <CitySelector selectedCity={selectedCity} setSelectedCity={setSelectedCity} />
+      
+      <ul className="opponent-list">
+        {selectedCity && requests.length > 0 ? (
+          requests.map((req) => (
+            <li key={req._id} className="opponent-item">
+              <p className="opponent-info"><strong>⚽ Takım Boyutu:</strong> {req.teamSize}</p>
+              <p className="opponent-info"><strong>📝 Açıklama:</strong> {req.description || 'Belirtilmemiş'}</p>
+              <p className="opponent-info">
+                <strong>👤 Kullanıcı:</strong> 
+                <Link to={`/user/${req.user._id}`} className="opponent-user-link">
+                  {req.user.fullName}
+                </Link>
+              </p>
+              <div className="opponent-buttons">
+                <button className="opponent-button message-btn" onClick={() => setActiveChat({ id: req.user._id, model: 'User' })}>
+                  💬 Mesajlaş
+                </button>
+                {req.user._id === user?.id && (
+                  <button className="opponent-button found-btn" onClick={async () => {
+                      try {
+                        await axios.put(`http://localhost:5002/api/requests/${req._id}/status`, {}, {
+                          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                        });
+                        alert('Rakip bulundu olarak işaretlendi.');
+                      } catch (error) {
+                        console.error('Durum güncellenemedi:', error);
+                      }
+                    }}>
+                    ✅ Rakip Bulundu
+                  </button>
+                )}
+              </div>
+            </li>
+          ))
+        ) : selectedCity ? (
+          <p className="opponent-empty">Bu şehirde henüz rakip bulma talebi yok.</p>
+        ) : (
+          <p className="opponent-empty">Lütfen bir şehir seçin.</p>
+        )}
+      </ul>
 
-      {/* ChatBox Bileşeni */}
       {activeChat && (
         <ChatBox
           receiverId={activeChat.id}

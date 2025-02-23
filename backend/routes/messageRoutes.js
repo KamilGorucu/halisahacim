@@ -3,7 +3,9 @@ const router = express.Router();
 const {
   sendMessage,
   getMessages,
-  getUsersForChat,
+  getMessagesForBusiness,
+  getChatList,
+  getChatListForBusiness,
   getUnreadMessages,
   markMessagesAsRead,
 } = require('../controllers/messageController');
@@ -15,11 +17,13 @@ router.post('/send-business', protectBusiness, sendMessage);
 
 // Mesaj geçmişi
 router.get('/history/:chatUserId', protect, getMessages);
-router.get('/history-business/:chatUserId', protectBusiness, getMessages);
+router.get('/history-business/:chatUserId', protectBusiness, getMessagesForBusiness);
 
-// Sohbet için kullanıcıları getir
-router.get('/users', protect, getUsersForChat);
-router.get('/users-business', protectBusiness, getUsersForChat);
+// Kullanıcılar için sohbet geçmişi
+router.get('/chat-list', protect, getChatList);
+
+// **İşletmeler için sohbet geçmişi**
+router.get('/chat-list-business', protectBusiness, getChatListForBusiness);
 
 // Yeni mesaj bildirimlerini getir
 router.get('/unread', protect, getUnreadMessages);

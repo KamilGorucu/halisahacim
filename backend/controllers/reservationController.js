@@ -50,6 +50,23 @@ const getAvailableSlots = async (req, res) => {
   }
 };
 
+// Kullanıcının belirli bir halısaha için haftalık rezervasyon sayısını kontrol etme fonksiyonu
+const checkWeeklyReservationLimit = async (userId, businessId, date) => {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Haftanın başlangıcı (Pazartesi)
+  
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Haftanın sonu (Pazar)
+
+  const count = await Reservation.countDocuments({
+    user: userId,
+    business: businessId,
+    date: { $gte: startOfWeek, $lte: endOfWeek },
+  });
+
+  return count >= 3; // Kullanıcı 3 veya daha fazla rezervasyon yaptıysa true döner
+};
+
 const createReservation = async (req, res) => {
   try {
     const { userEmail, businessId, date, timeSlot, fieldName } = req.body;
@@ -62,6 +79,13 @@ const createReservation = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Kullanıcı bulunamadı!' });
     }
+
+    // Haftalık rezervasyon limitini kontrol et
+    const hasReachedLimit = await checkWeeklyReservationLimit(user._id, businessId, date);
+    if (hasReachedLimit) {
+      return res.status(400).json({ message: 'Bir hafta içinde aynı halısaha için en fazla 3 rezervasyon yapabilirsiniz!' });
+    }
+    
     // Aynı kullanıcı için aynı tarih, saha ve saat diliminde rezervasyon kontrolü
     const existingReservation = await Reservation.findOne({
       user: user._id,
@@ -281,5 +305,6 @@ module.exports = {
   approveReservation, 
   rejectReservation, 
   getReservationSlots, 
-  getWeeklyReservations 
+  getWeeklyReservations,
+  checkWeeklyReservationLimit
 };

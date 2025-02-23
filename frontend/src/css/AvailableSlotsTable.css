@@ -1,0 +1,152 @@
+/* Ana Konteyner */
+.available-slots-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* İşletme Adı */
+  .business-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1B5E20;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  /* Tarih Seçici */
+  .date-label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .date-picker {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Bölüm Başlıkları */
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  /* Saha Konteyner */
+  .field-container {
+    margin-bottom: 20px;
+  }
+  
+  .field-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Saat Aralıkları Tablosu */
+  .slots-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .slots-table th, .slots-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  /* Dolu & Boş Saatler */
+  .unavailable {
+    background-color: #ffdddd;
+  }
+  
+  .unavailable-text {
+    color: red;
+    font-weight: bold;
+  }
+  
+  .available {
+    background-color: #e8f5e9;
+  }
+  
+  /* Bekleyen Durum */
+  .pending {
+    color: #ff9800;
+    font-weight: bold;
+  }
+  
+  /* Rezervasyon Butonu */
+  .reserve-button {
+    padding: 8px 12px;
+    background-color: #1B5E20;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .reserve-button:hover {
+    background-color: #388E3C;
+  }
+  
+  /* Fotoğraf Galerisi */
+  .photo-section {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .photo-gallery {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .thumbnail {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.3s;
+  }
+  
+  .thumbnail:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Büyük Fotoğraf Görünümü */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    position: relative;
+  }
+  
+  .large-photo {
+    max-width: 90%;
+    max-height: 80vh;
+    border-radius: 10px;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+  }
+  

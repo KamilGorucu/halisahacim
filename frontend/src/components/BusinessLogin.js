@@ -1,18 +1,24 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
+import Recaptcha from './Recaptcha';
+import '../css/BusinessLogin.css';
 
 const BusinessLogin = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  // const [recaptchaToken, setRecaptchaToken] = useState('');
   const navigate = useNavigate();
   const { login, setBusiness } = useContext(AuthContext); // Giriş işlemi için AuthContext'ten `login` fonksiyonunu al.
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    // if (!recaptchaToken) {
+    //   alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
+    //   return;
+    // }
     // Emaili normalize et
     const normalizedEmail = formData.email.trim().toLowerCase();
   
@@ -20,7 +26,7 @@ const BusinessLogin = () => {
       const response = await fetch('http://localhost:5002/api/business/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, email: normalizedEmail }),
+        body: JSON.stringify({ ...formData, email: normalizedEmail, }),
       });
   
       const data = await response.json();
@@ -48,24 +54,29 @@ const BusinessLogin = () => {
   };  
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>İşletme Giriş</h2>
-      <input
-        type="email"
-        placeholder="E-posta"
-        value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Şifre"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        required
-      />
-      <button type="submit">Giriş Yap</button>
-    </form>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2 className="login-title">İşletme Giriş</h2>
+        <input
+          type="email"
+          className="login-input"
+          placeholder="E-posta"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+        <input
+          type="password"
+          className="login-input"
+          placeholder="Şifre"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          required
+        />
+         {/* <Recaptcha onVerify={(token) => setRecaptchaToken(token)} /> */}
+        <button className="login-button" type="submit">Giriş Yap</button>
+      </form>
+    </div>
   );
 };
 

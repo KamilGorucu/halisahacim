@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import '../css/AvailableSlotsTable.css';
 
 const AvailableSlotsTable = () => {
   const [slots, setSlots] = useState([]); // Boş ve dolu saatlerin listesi
   const location = useLocation();
   const business = location.state?.business || {}; // İşletme bilgileri
   const [selectedDate, setSelectedDate] = useState(''); // Seçilen tarih
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // API'den saat aralıklarını çekme
   const fetchSlots = useCallback(async () => {
@@ -76,23 +78,30 @@ const AvailableSlotsTable = () => {
   }, [fetchSlots]);
 
   return (
-    <div>
-      <h2>{business.businessName}</h2>
-      <label>
+    <div className="available-slots-container">
+      <h2 className="business-name">{business.businessName}</h2>
+      
+      <label className="date-label">
         Tarih Seç:
         <input
           type="date"
+          className="date-picker"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
           required
         />
       </label>
-      <h3>Sahalar</h3>
+      
+      <p className="info-message">
+        ❗ Bir hafta içinde aynı halısaha için en fazla <strong>3 farklı saate</strong> rezervasyon yapabilirsiniz.
+      </p>
+
+      <h3 className="section-title">Sahalar</h3>
       {slots.length > 0 ? (
         slots.map((field, index) => (
-          <div key={index}>
-            <h4>{field.fieldName} ({field.capacity})</h4>
-            <table border="1" style={{ width: '100%', textAlign: 'center' }}>
+          <div key={index} className="field-container">
+            <h4 className="field-title">{field.fieldName} ({field.capacity})</h4>
+            <table className="slots-table">
               <thead>
                 <tr>
                   <th>Saat Aralığı</th>
@@ -102,18 +111,18 @@ const AvailableSlotsTable = () => {
               </thead>
               <tbody>
                 {field.timeSlots.map((slot, i) => (
-                  <tr key={i}>
+                  <tr key={i} className={slot.isAvailable ? 'available' : 'unavailable'}>
                     <td>{slot.timeSlot}</td>
                     <td>{slot.isAvailable ? 'Boş' : 'Dolu'}</td>
                     <td>
                       {slot.status === 'pending' && slot.userEmail === localStorage.getItem('email') ? (
-                        <span>Bekliyor</span>
+                        <span className="pending">Bekliyor</span>
                       ) : slot.isAvailable ? (
-                        <button onClick={() => handleReservation(field.fieldName, slot.timeSlot)}>
+                        <button className="reserve-button" onClick={() => handleReservation(field.fieldName, slot.timeSlot)}>
                           Rezervasyon Yap
                         </button>
                       ) : (
-                        <span>Dolu</span>
+                        <span className="unavailable-text">Dolu</span>
                       )}
                     </td>
                   </tr>
@@ -123,19 +132,21 @@ const AvailableSlotsTable = () => {
           </div>
         ))
       ) : (
-        <p>Tarih Seçiniz.</p>
+        <p className="no-slots-message">Tarih Seçiniz.</p>
       )}
+
       {/* İşletme Fotoğrafları */}
-      <div>
+      <div className="photo-section">
         <h3>İşletme Fotoğrafları</h3>
         {business.photos && business.photos.length > 0 ? (
-          <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+          <div className="photo-gallery">
             {business.photos.map((photo, index) => (
               <img
                 key={index}
                 src={`http://localhost:5002/${photo}`}
                 alt={`${business.businessName} Fotoğrafı`}
-                style={{ width: '150px', height: '100px', objectFit: 'cover' }}
+                className="thumbnail"
+                onClick={() => setSelectedPhoto(photo)}
               />
             ))}
           </div>
@@ -143,6 +154,16 @@ const AvailableSlotsTable = () => {
           <p>Bu işletme için fotoğraf bulunmamaktadır.</p>
         )}
       </div>
+
+      {/* Büyük Fotoğraf Görünümü */}
+      {selectedPhoto && (
+        <div className="overlay" onClick={() => setSelectedPhoto(null)}>
+          <div className="modal">
+            <span className="close-button" onClick={() => setSelectedPhoto(null)}>&times;</span>
+            <img src={`http://localhost:5002/${selectedPhoto}`} alt="Büyük Fotoğraf" className="large-photo" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

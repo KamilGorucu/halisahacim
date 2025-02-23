@@ -15,6 +15,11 @@ const protect = async (req, res, next) => {
         return res.status(404).json({ message: 'Kullanıcı bulunamadı.' });
       }
 
+      // Kullanıcının hesabı kilitliyse erişimi engelle
+      if (user.isLocked) {
+        return res.status(403).json({ message: 'Hesabınız geçici olarak kilitlenmiştir. Lütfen daha sonra tekrar deneyin!' });
+      }
+
       req.user = user;
       next();
     } catch (error) {
@@ -63,7 +68,7 @@ const protectBusiness = async (req, res, next) => {
       });
     }
 
-    req.businessId = decoded.id;
+    req.businessId = business._id.toString();
     req.business = business;
     next();
   } catch (error) {

@@ -1,0 +1,373 @@
+/* Genel Profil Sayfası */
+.business-profile-container {
+    width: 100%;
+    max-width: 90%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Profil Başlığı */
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 22px;
+    color: #2d6a4f;
+    border-bottom: 2px solid #2d6a4f;
+    padding-bottom: 10px;
+  }
+  
+  /* Aç-Kapat Butonu */
+  .toggle-button {
+    background-color: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #2d6a4f;
+    transition: transform 0.3s ease;
+  }
+  
+  .toggle-button:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Genel Form Konteyneri */
+.update-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Saha Bilgileri Bölümü */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .field-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .field-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .field-input:focus {
+    border-color: #2d6a4f;
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(45, 106, 79, 0.5);
+  }
+  
+  /* Çalışma Saatleri Bölümü */
+  .working-hours {
+    margin-top: 10px;
+  }
+  
+  .working-hour-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #e9f7ef;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #b7d9c5;
+  }
+  
+  .working-hour-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1b4332;
+  }
+  
+  .working-hour-input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #2d6a4f;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .remove-hour-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .remove-hour-button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Ekle Butonu */
+  .add-hour-button {
+    background-color: #2d6a4f;
+    color: white;
+    font-size: 14px;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+  }
+  
+  .add-hour-button:hover {
+    background-color: #1b4332;
+  }
+  
+  /* Güncelleme Butonu */
+  .update-submit-button {
+    background-color: #0078d4;
+    color: white;
+    font-size: 16px;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+  }
+  
+  .update-submit-button:hover {
+    background-color: #005a9e;
+  }
+  
+  /* Başlık */
+.weekly-reservations-title {
+    font-size: 24px;
+    color: #2d6a4f;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  /* Haftalık Gezinme Butonları */
+  .week-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .week-button {
+    background-color: #2d6a4f;
+    color: white;
+    font-size: 14px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .week-button:hover {
+    background-color: #1b4332;
+  }
+  
+  /* Rezervasyon Konteyneri */
+  .weekly-reservations-container {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  /* Saha Başlığı */
+  .field-title {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Tablo Stili */
+  .weekly-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+  }
+  
+  .weekly-header {
+    background-color: #2d6a4f;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .weekly-row:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .weekly-date {
+    font-weight: bold;
+    padding: 8px;
+  }
+  
+  .weekly-cell {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+  }
+  
+  /* Renk Durumları */
+  .weekly-cell.approved {
+    background-color: red;
+    color: white;
+  }
+  
+  .weekly-cell.pending {
+    background-color: green;
+    color: white;
+  }
+  
+  .weekly-cell.rejected {
+    background-color: white;
+  }
+  
+  .approved-user {
+    font-weight: bold;
+  }
+  
+  .pending-text {
+    font-style: italic;
+  }
+  
+  .empty-slot {
+    color: #777;
+  }
+  
+  /* Veri Bulunamadı */
+  .no-reservations {
+    text-align: center;
+    font-size: 16px;
+    color: #888;
+    margin-top: 10px;
+  }
+
+  /* Rezervasyon Konteyneri */
+.reservation-requests-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  /* Başlık */
+  .reservation-requests-title {
+    font-size: 22px;
+    color: #2d6a4f;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  /* Rezervasyon Listesi */
+  .reservation-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .reservation-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Rezervasyon Bilgileri */
+  .reservation-info {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  /* Durum Renkleri */
+  .reservation-status {
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 8px;
+  }
+  
+  .reservation-status.pending {
+    color: white;
+    background-color: orange;
+  }
+  
+  .reservation-status.approved {
+    color: white;
+    background-color: green;
+  }
+  
+  .reservation-status.rejected {
+    color: white;
+    background-color: red;
+  }
+  
+  /* Butonlar */
+  .reservation-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .approve-button, .reject-button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .approve-button {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .approve-button:hover {
+    background-color: #218838;
+  }
+  
+  .reject-button {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .reject-button:hover {
+    background-color: #c82333;
+  }
+  
+  /* Veri Bulunamadı */
+  .no-requests {
+    text-align: center;
+    font-size: 16px;
+    color: #888;
+    margin-top: 10px;
+  }
+  

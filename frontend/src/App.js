@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AuthContext, { AuthProvider } from './contexts/AuthContext';
+import axios from 'axios';
 import './css/NavigationFooter.css';
 import Home from './components/Home';
 import UserRegister from './components/UserRegister';
@@ -12,8 +13,6 @@ import BusinessLogin from './components/BusinessLogin';
 import SearchForm from './components/SearchForm';
 import SearchResults from './components/SearchResults';
 import AvailableSlotsTable from './components/AvailableSlotsTable';
-import BusinessReservationTable from './components/BusinessReservationTable';
-import UserReservations from './components/UserReservations';
 import TournamentList from './components/TournamentList';
 import TournamentCreate from './components/TournamentCreate';
 import TournamentDetails from './components/TournamentDetails';
@@ -24,6 +23,8 @@ import Chat from './components/Chat'; // Yeni chat bileşeni eklendi
 import OpponentRequests from './components/OpponentRequests';
 import PlayerRequests from './components/PlayerRequests';
 import CreateRequest from './components/CreateRequest';
+import UserView from './components/UserView';
+import TeamRequests from './components/TeamRequests';
 
 function App() {
   const { user, business, logout } = useContext(AuthContext);
@@ -38,15 +39,14 @@ function App() {
           <Route path="/register-user" element={<UserRegister />} />
           <Route path="/login-user" element={<UserLogin />} />
           <Route path="/profile/user" element={<UserProfile />} />
-          <Route path="/reservations/user" element={<UserReservations />} />
           <Route path="/search" element={<SearchForm />} />
           <Route path="/results" element={<SearchResults />} />
+          <Route path="/user/:userId" element={<UserView />} /> {/* Kullanıcı profili görüntüleme */}
 
           {/* İşletme Rotaları */}
           <Route path="/register-business" element={<BusinessRegister />} />
           <Route path="/login-business" element={<BusinessLogin />} />
           <Route path="/profile/business" element={<BusinessProfile />} />
-          <Route path="/reservations/business" element={<BusinessReservationTable />} />
           <Route path="/available-slots" element={<AvailableSlotsTable />} />
           <Route path="/tournaments" element={<TournamentList />} />
           <Route path="/tournament-create" element={<TournamentCreate />} />
@@ -55,6 +55,7 @@ function App() {
           <Route path="/challenge-create" element={<ChallengeCreate />} />
           <Route path="/payment" element={<PaymentForm />} />
           <Route path="/chat" element={<Chat />} /> {/* Yeni chat rotası */}
+          <Route path="/team-requests" element={<TeamRequests />} />
           <Route path="/requests/opponent" element={<OpponentRequests />} />
           <Route path="/requests/player" element={<PlayerRequests />} />
           <Route path="/requests/create" element={<CreateRequest />} />
@@ -68,6 +69,28 @@ const Navigation = () => {
   const { user, business, logout } = useContext(AuthContext);
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const isBusiness = !!business;
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      try {
+        const endpoint = isBusiness
+          ? 'http://localhost:5002/api/messages/unread-business'
+          : 'http://localhost:5002/api/messages/unread';
+
+        const response = await axios.get(endpoint, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+
+        setUnreadCount(response.data.length);
+      } catch (error) {
+        console.error('Okunmamış mesajlar alınamadı:', error);
+      }
+    };
+
+    if (user || business) fetchUnreadMessages();
+  }, [user, business]);
 
   return (
     <>
@@ -81,17 +104,18 @@ const Navigation = () => {
                 <span onClick={() => setShowRegisterDropdown(!showRegisterDropdown)}>Kayıt Ol</span>
                 {showRegisterDropdown && (
                   <ul className="dropdown-menu">
-                    <li><Link to="/register-user">Kullanıcı Kayıt</Link></li>
-                    <li><Link to="/register-business">İşletme Kayıt</Link></li>
+                    <li><Link to="/register-user" onClick={() => setShowRegisterDropdown(false)}>Kullanıcı Kayıt</Link></li>
+                    <li><Link to="/register-business" onClick={() => setShowRegisterDropdown(false)}>İşletme Kayıt</Link></li>
                   </ul>
                 )}
               </li>
+
               <li className="menu-item dropdown">
                 <span onClick={() => setShowLoginDropdown(!showLoginDropdown)}>Giriş Yap</span>
                 {showLoginDropdown && (
                   <ul className="dropdown-menu">
-                    <li><Link to="/login-user">Kullanıcı Giriş</Link></li>
-                    <li><Link to="/login-business">İşletme Giriş</Link></li>
+                    <li><Link to="/login-user" onClick={() => setShowLoginDropdown(false)}>Kullanıcı Giriş</Link></li>
+                    <li><Link to="/login-business" onClick={() => setShowLoginDropdown(false)}>İşletme Giriş</Link></li>
                   </ul>
                 )}
               </li>
@@ -102,9 +126,11 @@ const Navigation = () => {
             <>
               <li className="menu-item"><Link to="/search">Halısahalar</Link></li>
               <li className="menu-item"><Link to="/profile/user">Profilim</Link></li>
-              <li className="menu-item"><Link to="/chat">Sohbet</Link></li>
+              <li className="menu-item">
+                <Link to="/chat">Sohbet {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}</Link></li>
               <li className="menu-item"><Link to="/requests/opponent">Rakip Bul</Link></li>
               <li className="menu-item"><Link to="/requests/player">Oyuncu Bul</Link></li>
+              <li className="menu-item"><Link to="/team-requests">Takım Bul</Link></li>
               <li className="menu-item"><Link to="/requests/create">Talep Oluştur</Link></li>
               <li className="menu-item logout" onClick={logout}>Çıkış Yap</li>
             </>
@@ -115,7 +141,8 @@ const Navigation = () => {
               {business.isActive ? (
                 <>
                   <li className="menu-item"><Link to="/profile/business">Profilim</Link></li>
-                  <li className="menu-item"><Link to="/chat">Sohbet</Link></li>
+                  <li className="menu-item">
+                    <Link to="/chat">Sohbet {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}</Link></li>
                   <li className="menu-item logout" onClick={logout}>Çıkış Yap</li>
                 </>
               ) : (
@@ -164,7 +191,6 @@ const Footer = () => {
       <div className="social-links">
         <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">📸 Instagram</a>
         <a href="https://x.com/yourprofile" target="_blank" rel="noopener noreferrer">🐦 X (Twitter)</a>
-        <a href="mailto:kamilgorucu07@gmail.com">📧 Mail</a>
       </div>
     </footer>
   );

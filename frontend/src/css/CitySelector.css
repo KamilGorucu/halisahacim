@@ -1,0 +1,38 @@
+/* Şehir Seçim Konteyneri */
+.city-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  
+  /* Label Stili */
+  .city-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #2d6a4f;
+    margin-bottom: 5px;
+  }
+  
+  /* Dropdown (Select) Stili */
+  .city-dropdown {
+    width: 100%;
+    max-width: 250px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #2d6a4f;
+    border-radius: 5px;
+    background-color: white;
+    color: #2d6a4f;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  /* Dropdown Hover ve Focus */
+  .city-dropdown:hover,
+  .city-dropdown:focus {
+    border-color: #40916c;
+    outline: none;
+    background-color: #f0fdf4;
+  }
+  

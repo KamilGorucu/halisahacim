@@ -15,7 +15,7 @@ router.get('/user', protect, getUserProfile);
 router.get('/business', protectBusiness, getBusinessProfile);
 
 // İşletme Profil Güncelle
-router.put('/business/update', protect, updateBusinessProfile);
+router.put('/business/update', protectBusiness, updateBusinessProfile);
 
 // Kullanıcı Profilini Güncelle
 router.put('/user/update', protect, updateUserProfile);

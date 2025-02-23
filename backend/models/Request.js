@@ -9,7 +9,7 @@ const RequestSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['findOpponent', 'findPlayer'], // Rakip bulma veya oyuncu bulma
+    enum: ['findOpponent', 'findPlayer', 'findTeam'], // Rakip bulma veya oyuncu bulma
     required: true,
   },
   location: {
@@ -17,6 +17,9 @@ const RequestSchema = new mongoose.Schema({
   },
   teamSize: {
     type: String, // Örneğin: 5v5, 7v7 (Sadece Rakip Bul için)
+  },
+  position: {
+    type: String,
   },
   positionNeeded: {
     type: String, // Örneğin: Kaleci, Forvet (Sadece Oyuncu Bul için)

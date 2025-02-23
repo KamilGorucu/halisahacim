@@ -2,15 +2,22 @@ const Business = require('../models/Business');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const verifyRecaptcha = require('../middleware/recaptchaMiddleware');
+const sendEmail = require('../utils/sendEmail');
 /**
  * İşletme Kaydı
  */
 exports.registerBusiness = async (req, res) => {
   try {
+    // await verifyRecaptcha(req, res, async () => {
     console.log('Gelen veri:', req.body);
 
     // Gelen verileri temizle ve parse et
     const { ownerName, businessName, email, password, location, fields, equipment } = req.body;
+
+    const existingBusiness = await Business.findOne({ email });
+      if (existingBusiness) {
+        return res.status(400).json({ message: 'Bu e-posta adresi zaten kayıtlı!' });
+      }
 
     // Gelen string verilerdeki çift tırnakları temizle
     const cleanString = (str) => (typeof str === 'string' ? str.replace(/^"|"$/g, '').trim() : str);
@@ -45,6 +52,8 @@ exports.registerBusiness = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(cleanedPassword, salt);
 
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
     const newBusiness = new Business({
       ownerName: cleanedOwnerName,
       businessName: cleanedBusinessName,
@@ -59,11 +68,17 @@ exports.registerBusiness = async (req, res) => {
       photos,
       isActive: true,
       nextPaymentDate: new Date(new Date().setDate(new Date().getDate() + 30)), // İlk ödeme tarihi
+      verificationCode,
     });
 
     await newBusiness.save();
+
+    // Telefon ve e-posta doğrulama kodları gönder
+    await sendEmail(email, 'E-posta Doğrulama Kodu', `Doğrulama Kodunuz: ${verificationCode}`);
+    
     res.status(201).json({ message: 'İşletme kaydı başarılı!', business: newBusiness });
-  } catch (error) {
+  // })
+} catch (error) {
     console.error('Backend Hatası:', error.message);
     res.status(500).json({ message: 'İşletme kaydı başarısız!', error: error.message });
   }
@@ -143,7 +158,9 @@ exports.searchBusinesses = async (req, res) => {
     const businesses = await Business.find({
       "location.city": { $regex: new RegExp(`^${normalizedCity}$`, 'i') },
       isActive: true,
-    }).select('businessName location fields photos equipment price ratings averageRating')
+    }) 
+    .sort({ averageRating: -1 }) // Ortalama puana göre azalan sırada sıralama
+    .select('businessName location fields photos equipment price ratings averageRating')
     .populate({
       path: 'ratings.user',
       select: 'fullName email',
@@ -214,7 +231,9 @@ exports.getBusinessById = async (req, res) => {
  */
 exports.listBusinesses = async (req, res) => {
   try {
-    const businesses = await Business.find();
+    const businesses = await Business.find()
+      .sort({ averageRating: -1 }) // Ortalama puana göre azalan sırada sıralama
+      .select('businessName location fields photos equipment price ratings averageRating');
     res.status(200).json(businesses);
   } catch (error) {
     res.status(500).json({ message: 'İşletmeler listelenemedi!', error: error.message });

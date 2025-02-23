@@ -1,0 +1,112 @@
+/* Ödeme Sayfası Genel Stil */
+.payment-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Başlık */
+  .payment-title {
+    color: #2d6a4f;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  /* Açıklama Bilgileri */
+  .payment-info {
+    color: #1b4332;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  /* Form Alanları */
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Her Bir Input Alanı */
+  .payment-field {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  .payment-field label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #2d6a4f;
+  }
+  
+  .payment-field input {
+    padding: 10px;
+    border: 1px solid #b7b7b7;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .payment-field input:focus {
+    border-color: #2d6a4f;
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(45, 106, 79, 0.5);
+  }
+  
+  /* Son Kullanma Tarihi */
+  .payment-expiry {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .expiry-container {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .expiry-container input {
+    width: 50%;
+  }
+  
+  /* CVV */
+  .payment-field input[type="text"] {
+    width: 100%;
+  }
+  
+  /* Ödenecek Tutar */
+  .payment-amount {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1b4332;
+    margin: 10px 0;
+  }
+  
+  /* Ödeme Butonu */
+  .payment-button {
+    background-color: #2d6a4f;
+    color: white;
+    font-size: 18px;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .payment-button:hover {
+    background-color: #1b4332;
+  }
+  
+  /* Hata Mesajı */
+  .payment-error {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+  }
+  

@@ -1,0 +1,35 @@
+/* Kullanıcı Profili Konteyner */
+.user-view-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Kullanıcı Adı */
+  .user-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1B5E20;
+    margin-bottom: 15px;
+  }
+  
+  /* Kullanıcı Bilgileri */
+  .user-details {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.6;
+    text-align: left;
+  }
+  
+  /* Yükleniyor Metni */
+  .loading-text {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+  }
+  

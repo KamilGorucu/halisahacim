@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import ChatBox from './ChatBox';
 import CitySelector from './CitySelector';
+import AuthContext from '../contexts/AuthContext';
+import '../css/PlayerRequests.css';
 
 const PlayerRequests = () => {
+  const { user } = useContext(AuthContext);
   const [selectedCity, setSelectedCity] = useState('');
   const [requests, setRequests] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -26,37 +30,58 @@ const PlayerRequests = () => {
   }, [selectedCity]);
 
   return (
-    <div>
-      <h2>Oyuncu Bulma Talepleri</h2>
-      <CitySelector selectedCity={selectedCity} setSelectedCity={setSelectedCity} />
-      <ul>
-        {selectedCity && requests.length > 0 ? (
-          requests.map((req) => (
-            <li key={req._id}>
-              <strong>Mevki:</strong> {req.positionNeeded || 'Belirtilmemiş'} <br />
-              <strong>Açıklama:</strong> {req.description || 'Belirtilmemiş'} <br />
-              <strong>Kullanıcı:</strong> {req.user.fullName} <br />
-              <button onClick={() => setActiveChat({ id: req.user._id, model: 'User' })}>
-                Mesajlaş
-              </button>
-            </li>
-          ))
-        ) : selectedCity ? (
-          <p>Bu şehirde henüz oyuncu bulma talebi yok.</p>
-        ) : (
-          <p>Lütfen bir şehir seçin.</p>
-        )}
-      </ul>
+    <div className="player-container">
+    <h2 className="player-title">⚽ Oyuncu Arayanlar</h2>
+    <CitySelector selectedCity={selectedCity} setSelectedCity={setSelectedCity} />
 
-      {/* ChatBox Bileşeni */}
-      {activeChat && (
-        <ChatBox
-          receiverId={activeChat.id}
-          receiverModel={activeChat.model}
-          onClose={() => setActiveChat(null)}
-        />
+    <ul className="player-list">
+      {selectedCity && requests.length > 0 ? (
+        requests.map((req) => (
+          <li key={req._id} className="player-item">
+            <p className="player-info"><strong>🏅 Mevki:</strong> {req.positionNeeded || 'Belirtilmemiş'}</p>
+            <p className="player-info"><strong>📝 Açıklama:</strong> {req.description || 'Belirtilmemiş'}</p>
+            <p className="player-info">
+              <strong>👤 Kullanıcı:</strong> 
+              <Link to={`/user/${req.user._id}`} className="player-user-link">
+                {req.user.fullName}
+              </Link>
+            </p>
+            <div className="player-buttons">
+              <button className="player-button message-btn" onClick={() => setActiveChat({ id: req.user._id, model: 'User' })}>
+                💬 Mesajlaş
+              </button>
+              {req.user._id === user?.id && (
+                <button className="player-button found-btn" onClick={async () => {
+                    try {
+                      await axios.put(`http://localhost:5002/api/requests/${req._id}/status`, {}, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                      });
+                      alert('Oyuncu bulundu olarak işaretlendi.');
+                    } catch (error) {
+                      console.error('Durum güncellenemedi:', error);
+                    }
+                  }}>
+                  ✅ Oyuncu Bulundu
+                </button>
+              )}
+            </div>
+          </li>
+        ))
+      ) : selectedCity ? (
+        <p className="player-empty">Bu şehirde henüz oyuncu bulma talebi yok.</p>
+      ) : (
+        <p className="player-empty">Lütfen bir şehir seçin.</p>
       )}
-    </div>
+    </ul>
+
+    {activeChat && (
+      <ChatBox
+        receiverId={activeChat.id}
+        receiverModel={activeChat.model}
+        onClose={() => setActiveChat(null)}
+      />
+    )}
+  </div>
   );
 };
 

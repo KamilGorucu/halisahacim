@@ -64,7 +64,31 @@ const deleteOldRequests = async () => {
   }
 };
 
+// Talep durumunu güncelleme
+const updateRequestStatus = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const request = await Request.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Talep bulunamadı.' });
+    }
+
+    if (request.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Bu talebi güncelleme yetkiniz yok.' });
+    }
+
+    request.status = 'completed'; // Talebi tamamlandı olarak işaretle
+    await request.save();
+
+    res.status(200).json({ message: 'Talep başarıyla güncellendi.', request });
+  } catch (error) {
+    console.error('Talep güncellenirken hata:', error);
+    res.status(500).json({ message: 'Talep güncellenirken hata oluştu.', error });
+  }
+};
+
 // Her saat çalıştırmak için zamanlayıcı
 setInterval(deleteOldRequests, 3600000); // 1 saat = 3600000 ms
 
-module.exports = { createRequest, getRequests, deleteOldRequests };
+module.exports = { createRequest, getRequests, deleteOldRequests, updateRequestStatus };

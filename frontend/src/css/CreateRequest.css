@@ -1,0 +1,72 @@
+/* Ana Konteyner */
+.request-container {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Başlık */
+  .request-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1B5E20;
+    margin-bottom: 20px;
+  }
+  
+  /* Form */
+  .request-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Etiketler */
+  .request-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+  }
+  
+  /* Giriş Kutuları */
+  .request-input,
+  .request-select,
+  .request-textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border 0.3s ease;
+  }
+  
+  /* Hover ve Focus */
+  .request-input:focus,
+  .request-select:focus,
+  .request-textarea:focus {
+    border: 1px solid #1B5E20;
+    outline: none;
+  }
+  
+  /* Buton */
+  .request-button {
+    background: #1B5E20;
+    color: white;
+    font-size: 16px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .request-button:hover {
+    background: #4CAF50;
+  }
+  

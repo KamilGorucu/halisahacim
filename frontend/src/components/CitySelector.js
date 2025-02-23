@@ -1,4 +1,5 @@
 import React from 'react';
+import '../css/CitySelector.css';
 
 const CitySelector = ({ selectedCity, setSelectedCity }) => {
   const cities = [
@@ -15,10 +16,11 @@ const CitySelector = ({ selectedCity, setSelectedCity }) => {
   ];
 
   return (
-    <div>
-      <label htmlFor="city">Şehir:</label>
+    <div className="city-selector-container">
+      <label htmlFor="city" className="city-label">Şehir:</label>
       <select
         id="city"
+        className="city-dropdown"
         value={selectedCity}
         onChange={(e) => setSelectedCity(e.target.value)}
       >

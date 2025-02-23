@@ -2,50 +2,59 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 import AuthContext from '../contexts/AuthContext';
+import '../css/ChatBox.css';
 
 const socket = socketIOClient('http://localhost:5002');
 
 const ChatBox = ({ receiverId, receiverModel, onClose }) => {
-  const { user, business } = useContext(AuthContext); // Kullanıcı ve işletme bilgilerini al
-  const loggedInId = user?.id || business?.id; // Giriş yapan kişinin ID'si
+  const { user, business } = useContext(AuthContext);
+  const loggedInId = user?.id || business?.id;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+
+  const isBusiness = !!business;
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const endpoint = business
+        const endpoint = isBusiness
           ? `http://localhost:5002/api/messages/history-business/${receiverId}`
           : `http://localhost:5002/api/messages/history/${receiverId}`;
-
+    
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-
         setMessages(response.data);
+
+        const markReadEndpoint = isBusiness
+          ? 'http://localhost:5002/api/messages/mark-read-business'
+          : 'http://localhost:5002/api/messages/mark-read';
+
+        await axios.post(markReadEndpoint, { chatUserId: receiverId }, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+
       } catch (error) {
         console.error('Mesaj geçmişi alınamadı:', error);
       }
     };
 
     fetchMessages();
-  }, [receiverId, business]);
-
-  useEffect(() => {
-    socket.on('receiveMessage', (message) => {
-      if (message.receiver === receiverId || message.sender === receiverId) {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      }
-    });
-
-    return () => socket.off('receiveMessage');
   }, [receiverId]);
+
+  // ENTER tuşuna basıldığında mesaj gönderme
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Sayfanın refresh olmasını engeller
+      sendMessage();
+    }
+  };
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
     try {
-      const endpoint = business
+      const endpoint = isBusiness
         ? 'http://localhost:5002/api/messages/send-business'
         : 'http://localhost:5002/api/messages/send';
 
@@ -64,97 +73,33 @@ const ChatBox = ({ receiverId, receiverModel, onClose }) => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <button onClick={onClose} style={styles.closeButton}>
-          Geri
-        </button>
+    <div className="chatbox-container">
+      <div className="chatbox-header">
         <h3>Mesajlaşma</h3>
+        <button className="chatbox-close" onClick={onClose}>✖</button>
       </div>
-      <div style={styles.messageContainer}>
+      <div className="chatbox-messages">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            style={{
-              ...styles.message,
-              alignSelf: message.sender === loggedInId ? 'flex-end' : 'flex-start',
-              backgroundColor: message.sender === loggedInId ? '#d1ffc4' : '#e0e0e0',
-            }}
+          <div 
+            key={index} 
+            className={`chatbox-message ${message.sender === loggedInId ? 'sent' : 'received'}`}
           >
             {message.content}
           </div>
         ))}
       </div>
-      <div style={styles.inputContainer}>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Mesaj yazın..."
-          style={styles.input}
+      <div className="chatbox-input">
+        <input 
+          type="text" 
+          value={newMessage} 
+          onChange={(e) => setNewMessage(e.target.value)} 
+          onKeyDown={handleKeyDown}
+          placeholder="Mesaj yazın..." 
         />
-        <button onClick={sendMessage} style={styles.sendButton}>
-          Gönder
-        </button>
+        <button onClick={sendMessage}>Gönder</button>
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px',
-    backgroundColor: '#f5f5f5',
-    borderBottom: '1px solid #ddd',
-  },
-  closeButton: {
-    border: 'none',
-    backgroundColor: 'transparent',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
-  messageContainer: {
-    flex: 1,
-    padding: '10px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    overflowY: 'auto',
-    backgroundColor: '#fff',
-  },
-  message: {
-    padding: '10px',
-    borderRadius: '10px',
-    maxWidth: '70%',
-  },
-  inputContainer: {
-    display: 'flex',
-    padding: '10px',
-    borderTop: '1px solid #ddd',
-  },
-  input: {
-    flex: 1,
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    marginRight: '10px',
-  },
-  sendButton: {
-    padding: '10px 20px',
-    backgroundColor: '#0078D4',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
 };
 
 export default ChatBox;

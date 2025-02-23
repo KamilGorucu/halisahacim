@@ -12,12 +12,13 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
+        console.log('📌 JWT Decode:', decoded); // Debugging için ekle
         if (decoded.exp * 1000 > Date.now()) {
           if (decoded.role === 'user') {
             setUser({ id: decoded.id, email: decoded.email, role: 'user' });
           } else if (decoded.role === 'business') {
-            setBusiness({ id: decoded.id, email: decoded.email, role: 'business', isActive: decoded.isActive });
-            localStorage.setItem('businessId', decoded.id); // Business ID'yi sakla
+            setBusiness({ id: decoded.id || decoded._id, email: decoded.email, role: 'business', isActive: decoded.isActive });
+            localStorage.setItem('businessId', decoded.id || decoded._id); // Business ID'yi sakla
           }
         } else {
           logout();
@@ -54,6 +55,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         business,
+        setUser,
         setBusiness,
         login,
         logout,

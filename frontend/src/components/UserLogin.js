@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
+import '../css/UserLogin.css';
 
 const UserLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -32,24 +33,28 @@ const UserLogin = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Kullanıcı Giriş</h2>
-      <input
-        type="email"
-        placeholder="E-posta"
-        value={formData.email}
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Şifre"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-        required
-      />
-      <button type="submit">Giriş Yap</button>
-    </form>
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2 className="login-title">Kullanıcı Giriş</h2>
+        <input
+          type="email"
+          className="login-input"
+          placeholder="E-posta"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+        <input
+          type="password"
+          className="login-input"
+          placeholder="Şifre"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          required
+        />
+        <button className="login-button" type="submit">Giriş Yap</button>
+      </form>
+    </div>
   );
 };
 

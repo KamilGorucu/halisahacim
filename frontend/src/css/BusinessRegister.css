@@ -1,0 +1,156 @@
+.business-register-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .business-register-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input-field,
+  .textarea-field {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .textarea-field {
+    resize: none;
+    height: 100px;
+  }
+  
+  .add-field-button,
+  .submit-button {
+    padding: 12px;
+    margin-top: 10px;
+    background: #27ae60;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .add-field-button:hover,
+  .submit-button:hover {
+    background: #219150;
+  }
+  
+  .file-input {
+    margin-top: 10px;
+  }
+
+  /* Saha Liste Alanı */
+.field-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .field-item {
+    background: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .field-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  .field-price {
+    font-size: 16px;
+    color: #27ae60;
+    margin: 5px 0;
+  }
+  
+  .field-hours-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  /* Saat Aralığı Listesi */
+  .time-slot-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+  
+  .time-slot-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f5f5f5;
+    padding: 8px;
+    border-radius: 5px;
+    margin-top: 5px;
+  }
+  
+  .delete-time-slot {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .delete-time-slot:hover {
+    background: #c0392b;
+  }
+  
+  /* Saat Seçim Alanı */
+  .time-slot-inputs {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .time-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .add-time-slot {
+    padding: 8px 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .add-time-slot:hover {
+    background: #2980b9;
+  }
+  
+  
+  @media (max-width: 600px) {
+    .business-register-container {
+      width: 90%;
+    }
+  
+    .input-field,
+    .textarea-field {
+      font-size: 14px;
+    }
+  }
+  

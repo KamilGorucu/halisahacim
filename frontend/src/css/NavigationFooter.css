@@ -1,3 +1,25 @@
+/* Genel Yapı için Ana Konteyner */
+.body-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Tüm pencere yüksekliğini kaplar */
+}
+
+/* İçerik Alanı */
+.content-container {
+  flex: 1; /* İçeriği esnek yapar ve footer'ı aşağı iter */
+}
+
+.unread-badge {
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 3px 7px;
+  border-radius: 50%;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
 /* Genel Navbar Ayarları */
 .navbar {
     background-color: #2E7D32; /* Yeşil */

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../css/BusinessProfile.css';
 
 const BusinessProfile = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const BusinessProfile = () => {
   const [reservations, setReservations] = useState([]); // Rezervasyonları tutar.
   const [weeklySlots, setWeeklySlots] = useState([]); // Haftalık görünüm için saat aralıkları
   const [weekOffset, setWeekOffset] = useState(0); // Geçmiş/gelecek haftalar için kaydırma
+  const [isUpdating, setIsUpdating] = useState(false); // Güncelleme alanını aç/kapat
   // const [isActive, setIsActive] = useState(false); // İşletme aktif durumu
   const navigate = useNavigate();
 
@@ -44,11 +46,16 @@ const BusinessProfile = () => {
     }
   },[navigate]);
 
+  const toggleUpdateSection = () => {
+    setIsUpdating(!isUpdating);
+  };
+
   const handleFieldChange = (index, key, value) => {
     const updatedFields = [...formData.fields];
     updatedFields[index][key] = value;
     setFormData({ ...formData, fields: updatedFields });
   };
+
 
   const handleWorkingHoursChange = (fieldIndex, hourIndex, key, value) => {
     const updatedFields = [...formData.fields];
@@ -236,152 +243,172 @@ const BusinessProfile = () => {
   };
 
   return (
-    <div>
-      <h2>İşletme Profilimi Güncelle</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="business-profile-container">
+      <div className="profile-header">
+        <h2>İşletme Profilimi Güncelle</h2>
+        <button className="toggle-button" onClick={toggleUpdateSection}>
+            {isUpdating ? '▲' : '▼'}
+        </button>
+      </div>
+
+      {isUpdating && (
+      <form className="update-form" onSubmit={handleSubmit}>
         {formData.fields.map((field, index) => (
-          <div key={index}>
-            <label>
+          <div key={index} className="field-group">
+            <label className="field-label">
               Saha Adı:
               <input
                 type="text"
+                className="field-input"
                 value={field.name}
                 onChange={(e) => handleFieldChange(index, 'name', e.target.value)}
               />
             </label>
-            <label>
+            <label className="field-label">
               Kapasite:
               <input
                 type="text"
+                className="field-input"
                 value={field.capacity}
                 onChange={(e) => handleFieldChange(index, 'capacity', e.target.value)}
               />
             </label>
-            <label>
+            <label className="field-label">
               Fiyat:
               <input
                 type="number"
+                className="field-input"
                 value={field.price}
                 onChange={(e) => handleFieldChange(index, 'price', e.target.value)}
               />
             </label>
-            {field.workingHours.map((hour, hourIndex) => (
-              <div key={hourIndex}>
-                <label>
-                  Başlangıç Saati:
-                  <input
-                    type="text"
-                    value={hour.start || ''}
-                    onChange={(e) =>
-                      handleWorkingHoursChange(index, hourIndex, 'start', e.target.value)
-                    }
-                  />
-                </label>
-                <label>
-                  Bitiş Saati:
-                  <input
-                    type="text"
-                    value={hour.end || ''}
-                    onChange={(e) =>
-                      handleWorkingHoursChange(index, hourIndex, 'end', e.target.value)
-                    }
-                  />
-                </label>
-                <button type="button" onClick={() => removeWorkingHour(index, hourIndex)}>
-                  Sil
-                </button>
-              </div>
-            ))}
-            <button type="button" onClick={() => addWorkingHour(index)}>
+      
+            <div className="working-hours">
+              {field.workingHours.map((hour, hourIndex) => (
+                <div key={hourIndex} className="working-hour-group">
+                  <label className="working-hour-label">
+                    Başlangıç Saati:
+                    <input
+                      type="text"
+                      className="working-hour-input"
+                      value={hour.start || ''}
+                      onChange={(e) =>
+                        handleWorkingHoursChange(index, hourIndex, 'start', e.target.value)
+                      }
+                    />
+                  </label>
+                  <label className="working-hour-label">
+                    Bitiş Saati:
+                    <input
+                      type="text"
+                      className="working-hour-input"
+                      value={hour.end || ''}
+                      onChange={(e) =>
+                        handleWorkingHoursChange(index, hourIndex, 'end', e.target.value)
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="remove-hour-button"
+                    onClick={() => removeWorkingHour(index, hourIndex)}
+                  >
+                    Sil
+                  </button>
+                </div>
+              ))}
+            </div>
+      
+            <button
+              type="button"
+              className="add-hour-button"
+              onClick={() => addWorkingHour(index)}
+            >
               Ekle
             </button>
           </div>
         ))}
-        <button type="submit">Güncelle</button>
-      </form>
+        <button type="submit" className="update-submit-button">
+          Güncelle
+        </button>
+      </form>    
+      )}
 
-      <h2>Haftalık Rezervasyon Tabloları</h2>
-        <div>
-          <button onClick={() => handleWeekChange(-1)}>Önceki Hafta</button>
-          <button onClick={() => handleWeekChange(1)}>Sonraki Hafta</button>
-        </div>
-        {weeklySlots.length > 0 ? (
-          weeklySlots.map((field, fieldIndex) => (
-            <div key={fieldIndex}>
-              <h3>{field.fieldName} - Kapasite: {field.capacity}</h3>
-              <table border="1" style={{ width: '100%', textAlign: 'center', marginBottom: '20px' }}>
-                <thead>
-                  <tr>
-                    <th>Tarih</th>
-                    {field.weeklyData[0]?.daySlots?.map((slot, index) => (
-                      <th key={index}>{slot.timeSlot || "Saat Yok"}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
+      <h2 className="weekly-reservations-title">Haftalık Rezervasyon Tabloları</h2>
+      <div className="week-navigation">
+        <button className="week-button" onClick={() => handleWeekChange(-1)}>Önceki Hafta</button>
+        <button className="week-button" onClick={() => handleWeekChange(1)}>Sonraki Hafta</button>
+      </div>
+
+      {weeklySlots.length > 0 ? (
+        weeklySlots.map((field, fieldIndex) => (
+          <div key={fieldIndex} className="weekly-reservations-container">
+            <h3 className="field-title">{field.fieldName} - Kapasite: {field.capacity}</h3>
+            <table className="weekly-table">
+              <thead>
+                <tr>
+                  <th className="weekly-header">Tarih</th>
+                  {field.weeklyData[0]?.daySlots?.map((slot, index) => (
+                    <th key={index} className="weekly-header">{slot.timeSlot || "Saat Yok"}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
                 {field.weeklyData.map((day, index) => (
-                  <tr key={index}>
-                    <td>{formatDate(day.date)}</td>
+                  <tr key={index} className="weekly-row">
+                    <td className="weekly-date">{formatDate(day.date)}</td>
                     {day.daySlots?.map((slot, slotIndex) => (
                       <td
                         key={slotIndex}
-                        style={{
-                          backgroundColor:
-                            slot.status === 'approved'
-                              ? 'red' // Onaylananlar kırmızı
-                              : slot.status === 'rejected'
-                              ? 'white' // Reddedilenler beyaz
-                              : slot.status === 'pending'
-                              ? 'green' // Bekleyenler yeşil
-                              : 'white', // Varsayılan beyaz
-                        }}
+                        className={`weekly-cell ${slot.status}`}
                       >
                         {slot.status === 'approved' && slot.user ? (
-                          <span>{slot.user.fullName}</span> // Kullanıcı adı
+                          <span className="approved-user">{slot.user.fullName}</span>
                         ) : slot.status === 'pending' ? (
-                          'Bekliyor'
+                          <span className="pending-text">Bekliyor</span>
                         ) : (
-                          'Boş'
+                          <span className="empty-slot">Boş</span>
                         )}
                       </td>
                     ))}
                   </tr>
                 ))}
               </tbody>
-              </table>
-            </div>
-          ))
-        ) : (
-          <p>Henüz veri bulunmamaktadır.</p>
-        )}
-      <div>
-        <h2>Rezervasyon İstekleri</h2>
+            </table>
+          </div>
+        ))
+      ) : (
+        <p className="no-reservations">Henüz veri bulunmamaktadır.</p>
+      )}
+
+      <div className="reservation-requests-container">
+        <h2 className="reservation-requests-title">Rezervasyon İstekleri</h2>
         {reservations.length === 0 ? (
-          <p>Henüz rezervasyon isteği yok.</p>
+          <p className="no-requests">Henüz rezervasyon isteği yok.</p>
         ) : (
-          <ul>
+          <ul className="reservation-list">
             {reservations.map((res) => (
-              <li key={res._id}>
-                <p>
+              <li key={res._id} className="reservation-item">
+                <p className="reservation-info">
                   <strong>Kullanıcı:</strong> {res.user.fullName} ({res.user.email})
                 </p>
-                <p>
-                <strong>Halı Saha:</strong> {res.fieldName}
+                <p className="reservation-info">
+                  <strong>Halı Saha:</strong> {res.fieldName}
                 </p>
-                <p>
+                <p className="reservation-info">
                   <strong>Tarih:</strong> {formatDate(res.date)}
                 </p>
-                <p>
+                <p className="reservation-info">
                   <strong>Saat:</strong> {res.timeSlot}
                 </p>
-                <p>
+                <p className={`reservation-status ${res.status}`}>
                   <strong>Durum:</strong> {res.status}
                 </p>
                 {res.status === 'pending' && (
-                  <>
-                    <button onClick={() => handleApprove(res._id)}>Onayla</button>
-                    <button onClick={() => handleReject(res._id)}>Reddet</button>
-                  </>
+                  <div className="reservation-buttons">
+                    <button className="approve-button" onClick={() => handleApprove(res._id)}>Onayla</button>
+                    <button className="reject-button" onClick={() => handleReject(res._id)}>Reddet</button>
+                  </div>
                 )}
               </li>
             ))}

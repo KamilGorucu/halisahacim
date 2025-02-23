@@ -1,0 +1,103 @@
+/* Genel Konteyner */
+.profile-container {
+    margin: 50px auto;
+    max-width: 500px;
+    padding: 20px;
+    background-color: #f5f5f5; /* Hafif gri arka plan */
+    border-radius: 10px; /* Yuvarlatılmış köşeler */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    text-align: center; /* Ortalıyoruz */
+  }
+  
+  /* Başlık */
+  .profile-title {
+    font-size: 24px;
+    color: #2E7D32; /* Yeşil */
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* Form */
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Inputlar arası boşluk */
+  }
+  
+  /* Input Alanları */
+  .profile-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+  }
+  
+  .profile-input:focus {
+    border-color: #2E7D32; /* Odaklanınca yeşil kenar */
+    outline: none;
+  }
+  
+  /* Textarea */
+  .profile-textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease-in-out;
+    resize: none; /* Kullanıcı boyutlandırmasını engelle */
+  }
+  
+  .profile-textarea:focus {
+    border-color: #2E7D32; /* Odaklanınca yeşil kenar */
+    outline: none;
+  }
+  
+  /* Buton */
+  .profile-button {
+    background-color: #2E7D32; /* Yeşil */
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+  }
+  
+  .profile-button:hover {
+    background-color: #FFD700; /* Altın hover efekti */
+    color: black;
+    transform: scale(1.05); /* Hafif büyüme */
+  }
+  
+  .profile-button:active {
+    transform: scale(0.95); /* Tıklama efekti */
+  }
+  
+  /* Responsive Tasarım */
+  @media (max-width: 480px) {
+    .profile-container {
+      padding: 15px;
+    }
+  
+    .profile-title {
+      font-size: 20px;
+    }
+  
+    .profile-input, .profile-textarea {
+      font-size: 14px;
+      padding: 8px;
+    }
+  
+    .profile-button {
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+  }
+  

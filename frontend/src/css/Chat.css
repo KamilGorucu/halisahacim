@@ -1,0 +1,92 @@
+/* Ana Konteyner */
+.chat-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Sohbet Listesi Konteyneri */
+  .chat-list-container {
+    text-align: center;
+  }
+  
+  /* Sohbet Başlığı */
+  .chat-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1B5E20;
+    margin-bottom: 15px;
+  }
+  
+  /* Yeni Mesaj Uyarısı */
+  .new-message-alert {
+    background-color: #FF9800;
+    color: white;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  /* Sohbet Listesi */
+  .chat-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  /* Sohbet Öğesi */
+  .chat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    transition: background 0.3s;
+  }
+  
+  .chat-item:hover {
+    background: #e0e0e0;
+  }
+  
+  /* Kullanıcı İsmi Linki */
+  .chat-link {
+    text-decoration: none;
+    color: #1B5E20;
+    font-weight: bold;
+    transition: color 0.3s;
+  }
+  
+  .chat-link:hover {
+    color: #FF9800;
+  }
+
+  .unread-badge {
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 3px 7px;
+    border-radius: 50%;
+    margin-left: 5px;
+    font-weight: bold;
+  }
+  
+  /* Mesajlaşma Butonu */
+  .chat-button {
+    background-color: #1B5E20;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .chat-button:hover {
+    background-color: #388E3C;
+  }
+  

@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const verifyRecaptcha = async (req, res, next) => {
-  const recaptchaToken = req.body.recaptchaToken; // Frontend'den gelen token
+  const recaptchaToken = req.body.recaptchaToken;
 
   if (!recaptchaToken) {
     return res.status(400).json({ message: "reCAPTCHA doğrulaması gereklidir!" });
@@ -10,7 +10,7 @@ const verifyRecaptcha = async (req, res, next) => {
   try {
     const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
       params: {
-        secret: process.env.RECAPTCHA_SECRET_KEY, // .env dosyanızdaki reCAPTCHA gizli anahtarı
+        secret: process.env.RECAPTCHA_SECRET_KEY,
         response: recaptchaToken,
       },
     });

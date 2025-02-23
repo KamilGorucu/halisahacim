@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
+const { ipBlacklist } = require('./middleware/ipBlacklistMiddleware');
 
 // Rotalar
 const userRoutes = require('./routes/userRoutes');
@@ -48,6 +49,7 @@ app.use('/api/challenges', challengeRoutes);
 app.use('/api/messages', messageRoutes); // Mesaj rotaları
 app.use('/api/requests', requestsRoutes);
 
+app.use(ipBlacklist); // Tüm API isteklerinde IP kontrolü yap
 // API Test
 app.get('/', (req, res) => res.send('API Çalışıyor!'));
 
