@@ -8,6 +8,7 @@ const AvailableSlotsTable = () => {
   const business = location.state?.business || {}; // İşletme bilgileri
   const [selectedDate, setSelectedDate] = useState(''); // Seçilen tarih
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // API'den saat aralıklarını çekme
   const fetchSlots = useCallback(async () => {
@@ -26,7 +27,7 @@ const AvailableSlotsTable = () => {
       const data = await response.json();
       console.log('API Response:', data); // Gelen veriyi kontrol etmek için log ekledik
       if (response.ok) {
-        setSlots(data.slots); // Gelen saat aralıklarını kaydet
+        setSlots([...data.slots]); // ✅ State değişikliğini zorlamak için yeni array oluşturduk.
       } else {
         alert(data.message || 'Saat aralıkları alınamadı.');
       }

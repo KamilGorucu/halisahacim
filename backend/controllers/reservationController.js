@@ -6,7 +6,6 @@ const Message = require('../models/Message'); // Mesaj modeli eklendi
 const getAvailableSlots = async (req, res) => {
   try {
     const { date, businessId } = req.query;
-    const userId = req.user._id; // Kullanıcının ID'si (JWT'den gelen)
 
     if (!date || !businessId) {
       return res.status(400).json({ message: 'Tarih ve işletme bilgisi gerekli.' });
@@ -23,23 +22,15 @@ const getAvailableSlots = async (req, res) => {
       fieldName: field.name,
       capacity: field.capacity,
       timeSlots: field.workingHours.map((slot) => {
-        const reservation = reservations.find(
-          (res) =>
-            res.timeSlot === `${slot.start}-${slot.end}` &&
-            res.fieldName === field.name
+        const approvedReservation = reservations.find(
+          (res) => res.timeSlot === `${slot.start}-${slot.end}` && res.fieldName === field.name && res.status === 'approved'
         );
-        const isRequestingUser =
-          reservation && reservation.user.email === req.user.email;
 
         return {
           timeSlot: `${slot.start}-${slot.end}`,
-          isAvailable: !reservation || reservation.status === 'rejected' || (reservation.status === 'pending' && !isRequestingUser),
-          status: isRequestingUser
-            ? 'pending'
-            : reservation
-            ? reservation.status
-            : 'available',
-          userEmail: reservation ? reservation.user.email : null,
+          isAvailable: !approvedReservation, // Eğer approved varsa available değil
+          status: approvedReservation ? 'approved' : 'available',
+          user: approvedReservation ? approvedReservation.user : null, // Kullanıcı bilgisi ekleyelim
         };
       }),
     }));
@@ -166,17 +157,27 @@ const approveReservation = async (req, res) => {
       { $set: { status: 'rejected' } }
       );
     
-      // Onaylanan rezervasyon için kullanıcıya mesaj gönderme
-    const user = await User.findById(reservation.user);
-    if (user) {
-      await Message.create({
-        sender: reservation.business,
-        senderModel: 'Business',
-        receiver: user._id,
-        receiverModel: 'User',
-        content: 'Rezervasyonunuz Onaylandı! Sahaya vaktinde gelmeyi unutmayınız.',
-      });
-    }
+      const user = await User.findById(reservation.user);
+      if (user) {
+        // Tarih ve saat bilgilerini al ve formatla
+        const reservationDate = new Date(reservation.date);
+        const formattedDate = new Intl.DateTimeFormat('tr-TR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          weekday: 'long',
+        }).format(reservationDate);
+      
+        const messageContent = `Rezervasyonunuz Onaylandı! ${formattedDate} tarihinde ${reservation.timeSlot} saatindeki rezervasyonunuza gelmeyi unutmayınız.`;
+      
+        await Message.create({
+          sender: reservation.business,
+          senderModel: 'Business',
+          receiver: user._id,
+          receiverModel: 'User',
+          content: messageContent,
+        });
+      }
 
 
     res.status(200).json({ message: 'Rezervasyon onaylandı!' });
@@ -200,6 +201,18 @@ const rejectReservation = async (req, res) => {
 
     reservation.status = 'rejected';
     await reservation.save();
+
+    // **Saat aralığını tekrar available yap**
+    await Reservation.updateMany(
+      {
+        business: reservation.business,
+        date: reservation.date,
+        timeSlot: reservation.timeSlot,
+        fieldName: reservation.fieldName,
+        status: 'available'
+      },
+      { $set: { status: 'available' } }
+    );
 
     // Reddedilen rezervasyon için kullanıcıya mesaj gönderme
     const user = await User.findById(reservation.user);
@@ -273,12 +286,21 @@ const getWeeklyReservations = async (req, res) => {
         );
 
         const daySlots = timeSlots.map((slot) => {
-          const reservation = dayReservations.find((res) => res.timeSlot === slot);
+          const approvedReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'approved');
+          const pendingReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'pending');
+          const rejectedReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'rejected');
+
           return {
             timeSlot: slot,
-            isAvailable: !reservation || reservation.status === 'rejected',
-            user: reservation && reservation.status === 'approved' ? reservation.user : null,
-            status: reservation ? reservation.status : 'available',
+            isAvailable: !approvedReservation && !pendingReservation, // Eğer approved varsa available değil
+            user: approvedReservation ? approvedReservation.user : null,
+            status: approvedReservation
+              ? 'approved'
+              : pendingReservation
+              ? 'pending'
+              : rejectedReservation
+              ? 'rejected'
+              : 'available',
           };
         });
 

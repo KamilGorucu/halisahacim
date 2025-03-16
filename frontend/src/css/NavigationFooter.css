@@ -10,40 +10,47 @@
   flex: 1; /* İçeriği esnek yapar ve footer'ı aşağı iter */
 }
 
-.unread-badge {
-  background-color: red;
-  color: white;
-  font-size: 12px;
-  padding: 3px 7px;
-  border-radius: 50%;
-  margin-left: 5px;
-  font-weight: bold;
-}
-
 /* Genel Navbar Ayarları */
 .navbar {
     background-color: #2E7D32; /* Yeşil */
     padding: 10px 20px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
   }
+
+  .navbar-logo {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  display: none;
+}
   
   .menu {
     list-style: none;
-    display: flex;
-    padding: 0;
-    margin: 0;
-    width: 100%;
+  display: flex;
+  padding: 0;
+  margin: 0;
+  gap: 20px;
   }
+
+  .menu.menu-active {
+    right: 0;
+    display: flex;
+}
   
   .menu-item {
     position: relative;
-    margin: 0 15px; /* Daha dengeli aralık */
-  }
-  
-  .menu-item.left {
-    margin-right: auto; /* Sol tarafa yapışır */
+    margin-bottom: 15px;
   }
   
   .menu-item a,
@@ -135,12 +142,27 @@
   /* Responsive Ayarlar */
   @media (max-width: 768px) {
     .menu {
+      display: none;
       flex-direction: column;
-      align-items: flex-start;
-    }
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background-color: #2E7D32;
+      width: 200px;
+      padding: 10px;
+      box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+    .menu.menu-active {
+      display: flex;
+  }
+
+    .menu-toggle {
+      display: block;
+  }
   
     .menu-item {
-      margin-bottom: 10px;
+      margin: 10px 0;
     }
   
     .dropdown-menu {

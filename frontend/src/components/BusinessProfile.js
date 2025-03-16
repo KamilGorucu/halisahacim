@@ -5,11 +5,6 @@ import '../css/BusinessProfile.css';
 const BusinessProfile = () => {
   const [formData, setFormData] = useState({
     businessName: '',
-    // location: { city: '', coordinates: [] },
-    // workingHours: [],
-    // equipment: '',
-    // price: '',
-    // fieldCount: 0, // Yeni eklenen saha sayısı
     fields: [],
   });
   const [reservations, setReservations] = useState([]); // Rezervasyonları tutar.
@@ -126,6 +121,7 @@ const BusinessProfile = () => {
       );
       const data = await response.json();
       if (response.ok) {
+        console.log("Güncellenmiş WeeklySlots:", data.weeklyData);
         setWeeklySlots(data.weeklyData || []);
       } else {
         console.error('Haftalık veriler alınamadı:', data.message);
@@ -186,6 +182,7 @@ const BusinessProfile = () => {
       if (response.ok) {
         alert('Rezervasyon onaylandı!');
         fetchReservations(); // Listeyi güncelle
+        fetchWeeklySlots();  // ✅ **Haftalık görünümü de güncelle**
       } else {
         const data = await response.json();
         alert(data.message || 'Rezervasyon onaylanamadı.');
@@ -211,6 +208,7 @@ const BusinessProfile = () => {
       if (response.ok) {
         alert('Rezervasyon reddedildi!');
         fetchReservations(); // Listeyi güncelle
+        fetchWeeklySlots();  // ✅ **Haftalık görünümü de güncelle**
       } else {
         const data = await response.json();
         alert(data.message || 'Rezervasyon reddedilemedi.');
@@ -242,6 +240,26 @@ const BusinessProfile = () => {
     }
   };
 
+  const calculateWeeklyEarnings = () => {
+    let totalEarnings = 0;
+  
+    weeklySlots.forEach(field => {
+      field.weeklyData.forEach(day => {
+        day.daySlots.forEach(slot => {
+          if (slot.status === 'approved') {  // ✅ Sadece onaylı rezervasyonları hesapla
+            const fieldData = formData.fields.find(f => f.name === field.fieldName);
+            if (fieldData) {
+              totalEarnings += fieldData.price;
+            }
+          }
+        });
+      });
+    });
+  
+    return totalEarnings;
+  };
+  
+  
   return (
     <div className="business-profile-container">
       <div className="profile-header">
@@ -335,6 +353,7 @@ const BusinessProfile = () => {
       )}
 
       <h2 className="weekly-reservations-title">Haftalık Rezervasyon Tabloları</h2>
+      <h2 className="weekly-earnings">Haftalık Kazanç: {calculateWeeklyEarnings()} TL</h2>
       <div className="week-navigation">
         <button className="week-button" onClick={() => handleWeekChange(-1)}>Önceki Hafta</button>
         <button className="week-button" onClick={() => handleWeekChange(1)}>Sonraki Hafta</button>
@@ -344,37 +363,36 @@ const BusinessProfile = () => {
         weeklySlots.map((field, fieldIndex) => (
           <div key={fieldIndex} className="weekly-reservations-container">
             <h3 className="field-title">{field.fieldName} - Kapasite: {field.capacity}</h3>
-            <table className="weekly-table">
-              <thead>
-                <tr>
-                  <th className="weekly-header">Tarih</th>
-                  {field.weeklyData[0]?.daySlots?.map((slot, index) => (
-                    <th key={index} className="weekly-header">{slot.timeSlot || "Saat Yok"}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {field.weeklyData.map((day, index) => (
-                  <tr key={index} className="weekly-row">
-                    <td className="weekly-date">{formatDate(day.date)}</td>
-                    {day.daySlots?.map((slot, slotIndex) => (
-                      <td
-                        key={slotIndex}
-                        className={`weekly-cell ${slot.status}`}
-                      >
-                        {slot.status === 'approved' && slot.user ? (
-                          <span className="approved-user">{slot.user.fullName}</span>
-                        ) : slot.status === 'pending' ? (
-                          <span className="pending-text">Bekliyor</span>
-                        ) : (
-                          <span className="empty-slot">Boş</span>
-                        )}
-                      </td>
+            <div className="table-responsive"> {/* ✅ Yeni bir div ekledik */}
+              <table className="weekly-table">
+                <thead>
+                  <tr>
+                    <th className="weekly-header">Tarih</th>
+                    {field.weeklyData[0]?.daySlots?.map((slot, index) => (
+                      <th key={index} className="weekly-header">{slot.timeSlot || "Saat Yok"}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {field.weeklyData.map((day, index) => (
+                    <tr key={index} className="weekly-row">
+                      <td className="weekly-date">{formatDate(day.date)}</td>
+                      {day.daySlots?.map((slot, slotIndex) => (
+                        <td key={slotIndex} className={`weekly-cell ${slot.status}`}>
+                          {slot.status === 'approved' && slot.user?.fullName ? (
+                            <span className="approved-user">{slot.user.fullName}</span>
+                          ) : slot.status === 'pending' ? (
+                            <span className="pending-text">Bekliyor</span>
+                          ) : (
+                            <span className="empty-slot">Boş</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ))
       ) : (

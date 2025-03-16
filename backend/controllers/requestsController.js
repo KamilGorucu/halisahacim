@@ -5,7 +5,7 @@ const User = require('../models/User');
 // Yeni talep oluştur
 const createRequest = async (req, res) => {
   try {
-    const { type, teamSize, positionNeeded, description, location } = req.body;
+    const { type, teamSize, position, positionNeeded, description, location } = req.body;
 
     if (!location || !location.city) {
       return res.status(400).json({ message: 'Şehir bilgisi gereklidir.' });
@@ -16,6 +16,7 @@ const createRequest = async (req, res) => {
       type,
       location, // Şehir bilgisi frontend'den alınır
       teamSize: type === 'findOpponent' ? teamSize : undefined,
+      position: type === 'findTeam' ? position : undefined,  // Eğer ilan 'findTeam' ise mevkiyi kaydet
       positionNeeded: type === 'findPlayer' ? positionNeeded : undefined,
       description,
     });
@@ -40,6 +41,7 @@ const getRequests = async (req, res) => {
     const requests = await Request.find({
       type,
       'location.city': city,
+      status: 'open',
     })
       .populate('user', 'fullName position')
       .sort({ createdAt: -1 }); // Tarihe göre sıralama (en yeni)
@@ -68,6 +70,7 @@ const deleteOldRequests = async () => {
 const updateRequestStatus = async (req, res) => {
   try {
     const { requestId } = req.params;
+    const { matchedUser, matchDate } = req.body;
     const request = await Request.findById(requestId);
 
     if (!request) {
@@ -77,8 +80,11 @@ const updateRequestStatus = async (req, res) => {
     if (request.user.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Bu talebi güncelleme yetkiniz yok.' });
     }
+    
+    request.status = 'matched';
+    request.matchedUser = matchedUser;
+    request.matchDate = matchDate;
 
-    request.status = 'completed'; // Talebi tamamlandı olarak işaretle
     await request.save();
 
     res.status(200).json({ message: 'Talep başarıyla güncellendi.', request });

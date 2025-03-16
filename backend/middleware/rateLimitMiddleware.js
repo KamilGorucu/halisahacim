@@ -1,17 +1,54 @@
-const rateLimit = require('express-rate-limit');
+const RateLimit = require("../models/RateLimit");
 
-// Kullanıcı kayıt/giriş işlemleri için hız sınırlaması (5 dakika içinde max 5 deneme)
-exports.userLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 dakika
-  max: 5, // Maksimum 5 istek
-  message: { message: "Çok fazla istek attınız. Lütfen 5 dakika sonra tekrar deneyin!" },
-  headers: true,
-});
+// Kullanıcı giriş işlemleri için hız sınırlaması
+exports.userLimiter = async (req, res, next) => {
+  try {
+    const ip = req.ip;
+    const userId = req.user ? req.user._id : null; // Kullanıcı giriş yapmışsa ID kullan
 
-// İşletme kayıt/giriş işlemleri için hız sınırlaması (10 dakika içinde max 3 deneme)
-exports.businessLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 dakika
-  max: 3, // Maksimum 3 istek
-  message: { message: "Çok fazla istek attınız. Lütfen 10 dakika sonra tekrar deneyin!" },
-  headers: true,
-});
+    // Son 5 dakikadaki istekleri say
+    const requestCount = await RateLimit.countDocuments({
+      $or: [{ ip }, { userId }],
+    });
+
+    if (requestCount >= 10) {
+      return res.status(429).json({
+        message: "Çok fazla giriş denemesi yaptınız. Lütfen 5 dakika bekleyin!",
+      });
+    }
+
+    // Yeni bir giriş denemesi kaydı ekleyelim (MongoDB TTL ile otomatik silinecek)
+    await RateLimit.create({ ip, userId });
+
+    next();
+  } catch (error) {
+    console.error("Rate limit hatası:", error);
+    res.status(500).json({ message: "Rate limiting kontrolü sırasında hata oluştu." });
+  }
+};
+
+exports.businessLimiter = async (req, res, next) => {
+  try {
+    const ip = req.ip;
+    const userId = req.user ? req.user._id : null;
+
+    // Son 10 dakikadaki istekleri say
+    const requestCount = await RateLimit.countDocuments({
+      $or: [{ ip }, { userId }],
+    });
+
+    if (requestCount >= 6) {
+      return res.status(429).json({
+        message: "Çok fazla giriş denemesi yaptınız. Lütfen 10 dakika bekleyin!",
+      });
+    }
+
+    // Yeni bir giriş denemesi kaydı ekleyelim (MongoDB TTL ile otomatik silinecek)
+    await RateLimit.create({ ip, userId });
+
+    next();
+  } catch (error) {
+    console.error("Rate limit hatası:", error);
+    res.status(500).json({ message: "Rate limiting kontrolü sırasında hata oluştu." });
+  }
+};

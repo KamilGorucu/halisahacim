@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import AuthContext, { AuthProvider } from './contexts/AuthContext';
 import axios from 'axios';
 import './css/NavigationFooter.css';
@@ -69,8 +69,11 @@ const Navigation = () => {
   const { user, business, logout } = useContext(AuthContext);
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const isBusiness = !!business;
+  const menuRef = useRef(null);
+  const location = useLocation(); // Sayfa yönlendirmesini takip eder
 
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -92,12 +95,38 @@ const Navigation = () => {
     if (user || business) fetchUnreadMessages();
   }, [user, business]);
 
+  // Sayfa değiştiğinde menüyü otomatik kapat
+  useEffect(() => {
+    setShowMenu(false);
+    setShowRegisterDropdown(false);
+    setShowLoginDropdown(false);
+  }, [location]);
+
+  // Menü dışına tıklanınca kapanmasını sağla
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+        setShowRegisterDropdown(false);
+        setShowLoginDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       <nav className="navbar">
-        <ul className="menu">
-          <li className="menu-item left"><Link to="/">Anasayfa</Link></li>
+          <Link to="/" className="navbar-logo">Anasayfa</Link>
+          <button className="menu-toggle" onClick={() => setShowMenu(!showMenu)}>
+            ☰
+          </button>
 
+        <ul ref={menuRef} className={`menu ${showMenu ? 'menu-active' : ''}`}>
           {!user && !business && (
             <>
               <li className="menu-item dropdown">

@@ -27,10 +27,34 @@ if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   process.exit(1);
 }
 
+// 🌍 CORS Güncellemesi (Sadece belirli domainlerden istek kabul et)
+const allowedOrigins = [
+  "https://halisahacim.com",
+  "https://www.halisahacim.com",
+  "https://admin.halisahacim.com",
+];
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS hatası: Bu kaynaktan gelen istekler engellendi.'));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 📌 HTTP isteklerini otomatik HTTPS'ye yönlendir
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
 
 // Public dosyalar için statik yol
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,7 +75,9 @@ app.use('/api/requests', requestsRoutes);
 
 app.use(ipBlacklist); // Tüm API isteklerinde IP kontrolü yap
 // API Test
-app.get('/', (req, res) => res.send('API Çalışıyor!'));
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API başarıyla çalışıyor!' });
+});
 
 // Hata yönetimi
 app.use((err, req, res, next) => {

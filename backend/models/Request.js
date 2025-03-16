@@ -27,6 +27,18 @@ const RequestSchema = new mongoose.Schema({
   description: {
     type: String, // Açıklama
   },
+  status: {
+    type: String,
+    enum: ['open', 'matched', 'completed'], // Açık, eşleşmiş, tamamlanmış
+    default: 'open',
+  },
+  matchedUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Eşleştiği kullanıcı
+  },
+  matchDate: {
+    type: Date, // Maç tarihi
+  },
   createdAt: {
     type: Date,
     default: Date.now,

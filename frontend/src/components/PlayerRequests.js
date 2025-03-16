@@ -29,6 +29,19 @@ const PlayerRequests = () => {
     fetchRequests();
   }, [selectedCity]);
 
+  const handleMatch = async (reqId, matchedUser) => {
+    try {
+      await axios.put(`http://localhost:5002/api/requests/${reqId}/status`, { matchedUser }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+  
+      alert('Oyuncu bulundu olarak işaretlendi.');
+      setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reqId));
+    } catch (error) {
+      console.error('Durum güncellenemedi:', error);
+    }
+  };
+  
   return (
     <div className="player-container">
     <h2 className="player-title">⚽ Oyuncu Arayanlar</h2>
@@ -51,18 +64,9 @@ const PlayerRequests = () => {
                 💬 Mesajlaş
               </button>
               {req.user._id === user?.id && (
-                <button className="player-button found-btn" onClick={async () => {
-                    try {
-                      await axios.put(`http://localhost:5002/api/requests/${req._id}/status`, {}, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                      });
-                      alert('Oyuncu bulundu olarak işaretlendi.');
-                    } catch (error) {
-                      console.error('Durum güncellenemedi:', error);
-                    }
-                  }}>
-                  ✅ Oyuncu Bulundu
-                </button>
+                <button className="player-button found-btn" onClick={() => handleMatch(req._id, req.user._id)}>
+                ✅ Oyuncu Bulundu
+              </button>
               )}
             </div>
           </li>

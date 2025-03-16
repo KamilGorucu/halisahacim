@@ -29,6 +29,20 @@ const OpponentRequests = () => {
     fetchRequests();
   }, [selectedCity]);
 
+  const handleMatch = async (reqId, matchedUser) => {
+    try {
+      await axios.put(`http://localhost:5002/api/requests/${reqId}/status`, { matchedUser }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+  
+      alert('Rakip bulundu olarak işaretlendi.');
+      setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reqId));
+    } catch (error) {
+      console.error('Durum güncellenemedi:', error);
+    }
+  };
+  
+
   return (
     <div className="opponent-container">
       <h2 className="opponent-title">🏆 Rakip Arayanlar</h2>
@@ -51,18 +65,9 @@ const OpponentRequests = () => {
                   💬 Mesajlaş
                 </button>
                 {req.user._id === user?.id && (
-                  <button className="opponent-button found-btn" onClick={async () => {
-                      try {
-                        await axios.put(`http://localhost:5002/api/requests/${req._id}/status`, {}, {
-                          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                        });
-                        alert('Rakip bulundu olarak işaretlendi.');
-                      } catch (error) {
-                        console.error('Durum güncellenemedi:', error);
-                      }
-                    }}>
-                    ✅ Rakip Bulundu
-                  </button>
+                  <button className="opponent-button found-btn" onClick={() => handleMatch(req._id, req.user._id)}>
+                  ✅ Rakip Bulundu
+                </button>
                 )}
               </div>
             </li>

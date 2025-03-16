@@ -11,7 +11,7 @@ const UserRegister = () => {
     phone: '', // Telefon numarası
     teams: '', // Oynadığı takımlar
     position: '',
-    recaptchaToken: '',
+    // recaptchaToken: '',
   });
   const navigate = useNavigate();
   
@@ -21,10 +21,10 @@ const UserRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.recaptchaToken) {
-      alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
-      return;
-    }
+    // if (!formData.recaptchaToken) {
+    //   alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
+    //   return;
+    // }
     try {
       const response = await fetch('http://localhost:5002/api/users/register', {
         method: 'POST',
@@ -95,7 +95,7 @@ const UserRegister = () => {
           required
           className="user-input"
         />
-        <Recaptcha onVerify={handleRecaptchaVerify} />
+        {/* <Recaptcha onVerify={handleRecaptchaVerify} /> */}
         <button type="submit" className="user-register-button">Kayıt Ol</button>
       </form>
     </div>

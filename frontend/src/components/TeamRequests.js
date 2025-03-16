@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import CitySelector from './CitySelector';
+import ChatBox from './ChatBox';
 import { Link } from 'react-router-dom';
+import AuthContext from '../contexts/AuthContext';
 import '../css/TeamRequests.css';
 
 const TeamRequests = () => {
+  const { user } = useContext(AuthContext);
   const [selectedCity, setSelectedCity] = useState('');
   const [requests, setRequests] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -25,6 +29,20 @@ const TeamRequests = () => {
     fetchRequests();
   }, [selectedCity]);
 
+  const handleMatch = async (reqId, matchedUser) => {
+    try {
+      await axios.put(`http://localhost:5002/api/requests/${reqId}/status`, { matchedUser }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+  
+      alert('Takım bulundu olarak işaretlendi.');
+      setRequests((prevRequests) => prevRequests.filter((req) => req._id !== reqId));
+    } catch (error) {
+      console.error('Durum güncellenemedi:', error);
+    }
+  };
+  
+
   return (
     <div className="team-container">
       <h2 className="team-title">🏆 Takım Arayanlar</h2>
@@ -42,6 +60,19 @@ const TeamRequests = () => {
                   {req.user.fullName}
                 </Link>
               </p>
+              <div className="team-buttons">
+                <button 
+                  className="common-button message-btn"
+                  onClick={() => setActiveChat({ id: req.user._id, model: 'User' })}
+                >
+                  💬 Mesajlaş
+                </button>
+                {req.user._id === user?.id && ( // Yalnızca ilan sahibi için görünür
+                  <button className="common-button found-btn" onClick={() => handleMatch(req._id, req.user._id)}>
+                  ✅ Takım Bulundu
+                </button>
+                )}
+              </div>
             </li>
           ))
         ) : selectedCity ? (
@@ -50,6 +81,13 @@ const TeamRequests = () => {
           <p className="team-empty">Lütfen bir şehir seçin.</p>
         )}
       </ul>
+      {activeChat && (
+        <ChatBox
+          receiverId={activeChat.id}
+          receiverModel={activeChat.model}
+          onClose={() => setActiveChat(null)}
+        />
+      )}
     </div>
   );
 };
