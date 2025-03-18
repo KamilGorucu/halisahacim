@@ -1,4 +1,4 @@
-const RateLimit = require("../models/RateLimit");
+const RateLimit = require("../models/rateLimit");
 
 // Kullanıcı giriş işlemleri için hız sınırlaması
 exports.userLimiter = async (req, res, next) => {
