@@ -1,4 +1,4 @@
-const RateLimit = require("../models/rateLimit");
+const RateLimit = require("../models/RateLimit");
 
 // Kullanıcı giriş işlemleri için hız sınırlaması
 exports.userLimiter = async (req, res, next) => {
@@ -37,7 +37,7 @@ exports.businessLimiter = async (req, res, next) => {
       $or: [{ ip }, { userId }],
     });
 
-    if (requestCount >= 6) {
+    if (requestCount >= 10) {
       return res.status(429).json({
         message: "Çok fazla giriş denemesi yaptınız. Lütfen 10 dakika bekleyin!",
       });

@@ -218,8 +218,8 @@ const Footer = () => {
     <footer className={isHidden ? 'hidden' : ''}>
       <p>Site made by <strong>Kamil Görücü</strong></p>
       <div className="social-links">
-        <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener noreferrer">📸 Instagram</a>
-        <a href="https://x.com/yourprofile" target="_blank" rel="noopener noreferrer">🐦 X (Twitter)</a>
+        <a href="https://www.instagram.com/kamilgorucu7/" target="_blank" rel="noopener noreferrer">📸 Instagram</a>
+        <a href="https://x.com/kmlgrc07" target="_blank" rel="noopener noreferrer">🐦 X (Twitter)</a>
       </div>
     </footer>
   );

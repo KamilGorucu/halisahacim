@@ -4,7 +4,7 @@ const ExpressBrute = require('express-brute');
 const bruteStore = new ExpressBrute.MemoryStore();
 
 exports.bruteForceProtector = new ExpressBrute(bruteStore, {
-  freeRetries: 5, // 5 yanlış giriş hakkı
+  freeRetries: 10, // 10 yanlış giriş hakkı
   minWait: 5 * 60 * 1000, // 5 dakika kilitleme
   maxWait: 60 * 60 * 1000, // Maksimum 1 saat kilitleme
   failCallback: (req, res) => {
