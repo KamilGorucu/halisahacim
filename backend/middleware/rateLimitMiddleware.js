@@ -1,50 +1,25 @@
-const RateLimit = require("../models/RateLimit");
+const RateLimit = require("../models/rateLimit");
 
-// Kullanıcı giriş işlemleri için hız sınırlaması
-exports.userLimiter = async (req, res, next) => {
-  try {
-    const ip = req.ip;
-    const userId = req.user ? req.user._id : null; // Kullanıcı giriş yapmışsa ID kullan
-
-    // Son 5 dakikadaki istekleri say
-    const requestCount = await RateLimit.countDocuments({
-      $or: [{ ip }, { userId }],
-    });
-
-    if (requestCount >= 10) {
-      return res.status(429).json({
-        message: "Çok fazla giriş denemesi yaptınız. Lütfen 5 dakika bekleyin!",
-      });
-    }
-
-    // Yeni bir giriş denemesi kaydı ekleyelim (MongoDB TTL ile otomatik silinecek)
-    await RateLimit.create({ ip, userId });
-
-    next();
-  } catch (error) {
-    console.error("Rate limit hatası:", error);
-    res.status(500).json({ message: "Rate limiting kontrolü sırasında hata oluştu." });
-  }
-};
-
-exports.businessLimiter = async (req, res, next) => {
+// Hız sınırlama kontrolü
+const checkRateLimit = async (req, res, next, limit, timeWindow) => {
   try {
     const ip = req.ip;
     const userId = req.user ? req.user._id : null;
 
-    // Son 10 dakikadaki istekleri say
+    // Aynı kullanıcı veya IP için son belirlenen süre içindeki istekleri say
     const requestCount = await RateLimit.countDocuments({
       $or: [{ ip }, { userId }],
+      endpoint: req.originalUrl, // Farklı API isteklerini ayrı takip et
     });
 
-    if (requestCount >= 10) {
+    if (requestCount >= limit) {
       return res.status(429).json({
-        message: "Çok fazla giriş denemesi yaptınız. Lütfen 10 dakika bekleyin!",
+        message: `Çok fazla istek attınız. Lütfen ${timeWindow / 60} dakika sonra tekrar deneyin!`,
       });
     }
 
-    // Yeni bir giriş denemesi kaydı ekleyelim (MongoDB TTL ile otomatik silinecek)
-    await RateLimit.create({ ip, userId });
+    // Yeni giriş kaydı oluştur (MongoDB TTL sayesinde otomatik silinir)
+    await RateLimit.create({ ip, userId, endpoint: req.originalUrl });
 
     next();
   } catch (error) {
@@ -52,3 +27,9 @@ exports.businessLimiter = async (req, res, next) => {
     res.status(500).json({ message: "Rate limiting kontrolü sırasında hata oluştu." });
   }
 };
+
+// Kullanıcı giriş denemeleri için hız sınırlaması (5 dakika içinde max 10 deneme)
+exports.userLimiter = (req, res, next) => checkRateLimit(req, res, next, 10, 300);
+
+// İşletme giriş denemeleri için hız sınırlaması (10 dakika içinde max 6 deneme)
+exports.businessLimiter = (req, res, next) => checkRateLimit(req, res, next, 6, 600);
