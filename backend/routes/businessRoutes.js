@@ -11,12 +11,11 @@ const {
 } = require('../controllers/businessController');
 const upload = require('../middleware/uploadMiddleware');
 const { protect, protectBusiness } = require('../middleware/authMiddleware');
-const { businessLimiter } = require('../middleware/rateLimitMiddleware'); // Rate limiter middleware
 const { bruteForceProtector } = require('../middleware/bruteForceMiddleware');
 const router = express.Router();
 
-router.post('/register', businessLimiter, upload.array('photos', 5), registerBusiness);
-router.post('/login', bruteForceProtector.prevent, businessLimiter, loginBusiness);
+router.post('/register', upload.array('photos', 5), registerBusiness);
+router.post('/login', bruteForceProtector.prevent, loginBusiness);
 
 // İşletme arama ve listeleme rotaları
 router.get('/list', listBusinesses); // Tüm işletmelerin listesi
