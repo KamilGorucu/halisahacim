@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require("bcryptjs");
 const http = require('http');
 const socketIo = require('socket.io');
 const { ipBlacklist } = require('./middleware/ipBlacklistMiddleware');
