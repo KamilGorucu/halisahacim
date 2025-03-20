@@ -96,6 +96,9 @@ const Home = () => {
           <div className="why-card">
             <h3>✅ İlk Ay Ücretsiz!</h3>
             <p>İşletmeler için deneme fırsatı! İlk ay tamamen ücretsiz. 🎉</p>
+            <small style={{ fontSize: "14px", color: "#666", marginTop: "5px", display: "block" }}>
+              Sonraki aylarda aylık ücret <strong>1500₺</strong> olarak devam eder.
+            </small>
           </div>
         </div>
       </section>
