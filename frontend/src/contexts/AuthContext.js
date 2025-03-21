@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [business, setBusiness] = useState(null);
+  const [admin, setAdmin] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
@@ -19,6 +20,8 @@ export const AuthProvider = ({ children }) => {
           } else if (decoded.role === 'business') {
             setBusiness({ id: decoded.id || decoded._id, email: decoded.email, role: 'business', isActive: decoded.isActive });
             localStorage.setItem('businessId', decoded.id || decoded._id); // Business ID'yi sakla
+          } else if (decoded.role === 'admin') {
+            setAdmin({ role: "admin" });
           }
         } else {
           logout();
@@ -47,6 +50,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('businessId'); // İşletme ID'sini temizle
     setUser(null);
     setBusiness(null);
+    setAdmin(null);
     window.location.href = '/'; // Ana sayfaya yönlendirme
   };
 
@@ -55,11 +59,12 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         business,
+        admin,
         setUser,
         setBusiness,
         login,
         logout,
-        isLoggedIn: !!user || !!business,
+        isLoggedIn: !!user || !!business || !!admin,
       }}
     >
       {children}

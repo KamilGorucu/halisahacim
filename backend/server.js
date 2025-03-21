@@ -19,6 +19,7 @@ const tournamentRoutes = require('./routes/tournamentRoutes');
 const challengeRoutes = require('./routes/challengeRoutes');
 const messageRoutes = require('./routes/messageRoutes'); // Mesaj rotaları
 const requestsRoutes = require('./routes/requestsRoutes');
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -33,6 +34,8 @@ const allowedOrigins = [
   "https://halisahacim.com",
   "https://www.halisahacim.com",
   "https://admin.halisahacim.com",
+  "http://localhost:3000", // React frontend çalıştırıyorsan
+  "http://localhost:5002", // API backend için
 ];
 
 // Middleware
@@ -49,13 +52,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📌 HTTP isteklerini otomatik HTTPS'ye yönlendir
-app.use((req, res, next) => {
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect(`https://${req.headers.host}${req.url}`);
-  }
-  next();
-});
+// // 📌 HTTP isteklerini otomatik HTTPS'ye yönlendir
+// app.use((req, res, next) => {
+//   if (req.headers["x-forwarded-proto"] !== "https") {
+//     return res.redirect(`https://${req.headers.host}${req.url}`);
+//   }
+//   next();
+// });
+
+app.use("/api/admin", adminRoutes);
 
 // Public dosyalar için statik yol
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

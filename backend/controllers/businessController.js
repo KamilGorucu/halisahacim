@@ -22,8 +22,8 @@ exports.registerBusiness = async (req, res) => {
     // Gelen string verilerdeki çift tırnakları temizle
     const cleanString = (str) => (typeof str === 'string' ? str.replace(/^"|"$/g, '').trim() : str);
 
-    const parsedLocation = typeof location === 'string' ? JSON.parse(cleanString(location)) : location;
-    const parsedFields = typeof fields === 'string' ? JSON.parse(cleanString(fields)) : fields;
+    const cleanedCity = parsedLocation.city.charAt(0).toUpperCase() + parsedLocation.city.slice(1).toLowerCase();
+    const parsedFields = typeof fields === 'string' ? JSON.parse(fields) : fields;
 
     // Alanları temizle
     const cleanedOwnerName = cleanString(ownerName);
@@ -41,7 +41,7 @@ exports.registerBusiness = async (req, res) => {
       !cleanedBusinessName ||
       !cleanedEmail ||
       !cleanedPassword ||
-      !parsedLocation.coordinates ||
+      !cleanedCity.coordinates ||
       !parsedFields ||
       parsedFields.length === 0
     ) {
@@ -60,13 +60,14 @@ exports.registerBusiness = async (req, res) => {
       email: cleanedEmail,
       password: hashedPassword,
       location: {
-        city: parsedLocation.city || 'Belirtilmemiş',
+        city: cleanedCity.city || 'Belirtilmemiş',
         coordinates: parsedLocation.coordinates,
       },
       fields: parsedFields,
       equipment: cleanedEquipment,
       photos,
-      isActive: true,
+      isActive: false,
+      isApproved: false,
       nextPaymentDate: new Date(new Date().setDate(new Date().getDate() + 30)), // İlk ödeme tarihi
       verificationCode,
     });
@@ -152,12 +153,16 @@ exports.searchBusinesses = async (req, res) => {
   }
 
   try {
-    // Şehir adını normalize et
-    const normalizedCity = city.toLowerCase().trim();
+   // Şehir adını normalize et
+   const decodedCity = decodeURIComponent(city.trim()); // URL encoding'i düzelt
+   const normalizedCity = decodedCity.charAt(0).toUpperCase() + decodedCity.slice(1).toLowerCase(); // İlk harfi büyük yap
+
+   console.log('Aranan şehir:', normalizedCity);
 
     const businesses = await Business.find({
-      "location.city": { $regex: new RegExp(`^${normalizedCity}$`, 'i') },
+      "location.city": { $regex: `^${normalizedCity}$`, $options: "i" }, // Büyük küçük harf duyarsız regex
       isActive: true,
+      isApproved: true,
     }) 
     .sort({ averageRating: -1 }) // Ortalama puana göre azalan sırada sıralama
     .select('businessName location fields photos equipment price ratings averageRating')
@@ -231,7 +236,7 @@ exports.getBusinessById = async (req, res) => {
  */
 exports.listBusinesses = async (req, res) => {
   try {
-    const businesses = await Business.find()
+    const businesses = await Business.find({ isApproved: true, isActive: true })
       .sort({ averageRating: -1 }) // Ortalama puana göre azalan sırada sıralama
       .select('businessName location fields photos equipment price ratings averageRating');
     res.status(200).json(businesses);
@@ -293,3 +298,25 @@ exports.uploadPhoto = (req, res) => {
   }
 };
 
+/**
+ * İşletme Onayı - Admin tarafından işletme onaylanması
+ */
+ exports.approveBusiness = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const business = await Business.findById(id);
+    
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı!' });
+    }
+    
+    business.isApproved = true;
+    business.isActive = true; // ✔ İşletme artık görünür olacak
+
+    await business.save();
+    res.status(200).json({ message: 'İşletme başarıyla onaylandı!', business });
+  } catch (error) {
+    console.error('İşletme onay hatası:', error);
+    res.status(500).json({ message: 'İşletme onaylanamadı!', error: error.message });
+  }
+};

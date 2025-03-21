@@ -4,6 +4,7 @@ const UserSchema = new mongoose.Schema({
   fullName: { type: String, required: true }, // Kullanıcının tam adı
   email: { type: String, required: true, unique: true }, // Kullanıcının e-posta adresi
   password: { type: String, required: true }, // Kullanıcının şifresi (hashed)
+  role: { type: String, enum: ["user", "admin"], default: "user" },
   phone: {type: String, required: true},
   teams: { type: [String] }, // Kullanıcının oynadığı takımlar
   position: { type: String }, // Kullanıcının oynadığı mevki

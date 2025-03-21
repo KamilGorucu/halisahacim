@@ -25,14 +25,16 @@ import PlayerRequests from './components/PlayerRequests';
 import CreateRequest from './components/CreateRequest';
 import UserView from './components/UserView';
 import TeamRequests from './components/TeamRequests';
+import AdminDashboard from './components/AdminDashboard';
+import AdminLogin from "./components/AdminLogin";
 
 function App() {
-  const { user, business, logout } = useContext(AuthContext);
+  const { user, business, admin, logout } = useContext(AuthContext);
 
   return (
     <AuthProvider>
       <Router>
-        <Navigation user={user} business={business} logout={logout} />
+        <Navigation user={user} business={business} admin={admin} logout={logout} />
         <Routes>
           {/* Kullanıcı Rotaları */}
           <Route path="/" element={<Home />} />
@@ -42,6 +44,9 @@ function App() {
           <Route path="/search" element={<SearchForm />} />
           <Route path="/results" element={<SearchResults />} />
           <Route path="/user/:userId" element={<UserView />} /> {/* Kullanıcı profili görüntüleme */}
+
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
 
           {/* İşletme Rotaları */}
           <Route path="/register-business" element={<BusinessRegister />} />
@@ -66,7 +71,7 @@ function App() {
 }
 
 const Navigation = () => {
-  const { user, business, logout } = useContext(AuthContext);
+  const { user, business, admin, logout } = useContext(AuthContext);
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -127,7 +132,7 @@ const Navigation = () => {
           </button>
 
         <ul ref={menuRef} className={`menu ${showMenu ? 'menu-active' : ''}`}>
-          {!user && !business && (
+          {!user && !business && !admin && (
             <>
               <li className="menu-item dropdown">
                 <span onClick={() => setShowRegisterDropdown(!showRegisterDropdown)}>Kayıt Ol</span>
@@ -148,6 +153,12 @@ const Navigation = () => {
                   </ul>
                 )}
               </li>
+              {admin && (
+                <>
+                  <li className="menu-item"><Link to="/admin">Admin Paneli</Link></li>
+                  <li className="menu-item logout" onClick={logout}>Çıkış Yap</li>
+                </>
+              )}
             </>
           )}
 
@@ -183,6 +194,9 @@ const Navigation = () => {
               )}
             </>
           )}
+            {user && user.role === "admin" && (
+              <li className="menu-item"><Link to="/admin">Admin Paneli</Link></li>
+            )}
         </ul>
       </nav>
       <Footer />

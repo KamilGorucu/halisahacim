@@ -36,7 +36,8 @@ const BusinessSchema = new mongoose.Schema({
   fields: [FieldSchema],
   equipment: { type: String },
   photos: [{ type: String }],
-  isActive: { type: Boolean, default: true }, // Varsayılan olarak true
+  isActive: { type: Boolean, default: false }, // Varsayılan olarak true
+  isApproved: { type: Boolean, default: false }, // Admin onayı olmadan yayına çıkmasın
   nextPaymentDate: { type: Date }, // Bir sonraki ödeme tarihi
   ratings: [RatingSchema],
   averageRating: { type: Number, default: 0 },

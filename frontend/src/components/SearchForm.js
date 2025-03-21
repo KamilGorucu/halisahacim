@@ -8,9 +8,9 @@ const SearchForm = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-
+    const encodedCity = encodeURIComponent(city.trim());
     try {
-      const response = await fetch(`http://localhost:5002/api/business/search?city=${city}`);
+      const response = await fetch(`http://localhost:5002/api/business/search?city=${encodedCity}`);
       const data = await response.json();
 
       if (response.ok) {
