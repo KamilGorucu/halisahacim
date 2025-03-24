@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import '../css/SearchResults.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const SearchResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const SearchResults = () => {
   const submitRating = async (businessId) => {
     try {
       await axios.post(
-        `http://localhost:5002/api/business/${businessId}/ratings`,
+        `${API_URL}/business/${businessId}/ratings`,
         { rating, comment },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -72,10 +72,10 @@ const SearchResults = () => {
                   {business.photos.map((photo, index) => (
                     <img
                       key={index}
-                      src={`http://localhost:5002/${photo}`}
+                      src={`${API_URL}/${photo}`}
                       alt={`${business.businessName} Fotoğrafı`}
                       className="business-photo"
-                      onClick={() => setSelectedPhoto(`http://localhost:5002/${photo}`)}
+                      onClick={() => setSelectedPhoto(`${API_URL}/${photo}`)}
                     />
                   ))}
                 </div>

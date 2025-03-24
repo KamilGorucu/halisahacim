@@ -31,9 +31,9 @@ if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
 
 // 🌍 CORS Güncellemesi (Sadece belirli domainlerden istek kabul et)
 const allowedOrigins = [
-  "https://halisahacim.com",
-  "https://www.halisahacim.com",
-  "https://admin.halisahacim.com",
+  "http://xn--halsahacm-xpbf.com",
+  "https://www.xn--halsahacm-xpbf.com",
+  "https://admin.xn--halsahacm-xpbf.com",
   "http://localhost:3000", // React frontend çalıştırıyorsan
   "http://localhost:5002", // API backend için
 ];

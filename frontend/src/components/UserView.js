@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import '../css/UserView.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const UserView = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
@@ -10,7 +10,7 @@ const UserView = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`http://localhost:5002/api/users/${userId}`, {
+        const response = await axios.get(`${API_URL}/users/${userId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         setUser(response.data);

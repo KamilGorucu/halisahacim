@@ -5,7 +5,7 @@ import ChatBox from './ChatBox';
 import { Link } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 import '../css/TeamRequests.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const TeamRequests = () => {
   const { user } = useContext(AuthContext);
   const [selectedCity, setSelectedCity] = useState('');
@@ -16,7 +16,7 @@ const TeamRequests = () => {
     const fetchRequests = async () => {
       if (!selectedCity) return;
       try {
-        const response = await axios.get('http://localhost:5002/api/requests', {
+        const response = await axios.get(`${API_URL}/requests`, {
           params: { type: 'findTeam', city: selectedCity },
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
@@ -31,7 +31,7 @@ const TeamRequests = () => {
 
   const handleMatch = async (reqId, matchedUser) => {
     try {
-      await axios.put(`http://localhost:5002/api/requests/${reqId}/status`, { matchedUser }, {
+      await axios.put(`${API_URL}/requests/${reqId}/status`, { matchedUser }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
   

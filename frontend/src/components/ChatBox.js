@@ -3,8 +3,8 @@ import axios from 'axios';
 import socketIOClient from 'socket.io-client';
 import AuthContext from '../contexts/AuthContext';
 import '../css/ChatBox.css';
-
-const socket = socketIOClient('http://localhost:5002');
+const API_URL = process.env.REACT_APP_API_URL;
+const socket = socketIOClient(`${API_URL}`);
 
 const ChatBox = ({ receiverId, receiverModel, onClose }) => {
   const { user, business } = useContext(AuthContext);
@@ -18,8 +18,8 @@ const ChatBox = ({ receiverId, receiverModel, onClose }) => {
     const fetchMessages = async () => {
       try {
         const endpoint = isBusiness
-          ? `http://localhost:5002/api/messages/history-business/${receiverId}`
-          : `http://localhost:5002/api/messages/history/${receiverId}`;
+          ? `${API_URL}/messages/history-business/${receiverId}`
+          : `${API_URL}/messages/history/${receiverId}`;
     
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -27,8 +27,8 @@ const ChatBox = ({ receiverId, receiverModel, onClose }) => {
         setMessages(response.data);
 
         const markReadEndpoint = isBusiness
-          ? 'http://localhost:5002/api/messages/mark-read-business'
-          : 'http://localhost:5002/api/messages/mark-read';
+          ? `${API_URL}/messages/mark-read-business`
+          : `${API_URL}/messages/mark-read`;
 
         await axios.post(markReadEndpoint, { chatUserId: receiverId }, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -55,8 +55,8 @@ const ChatBox = ({ receiverId, receiverModel, onClose }) => {
 
     try {
       const endpoint = isBusiness
-        ? 'http://localhost:5002/api/messages/send-business'
-        : 'http://localhost:5002/api/messages/send';
+        ? `${API_URL}/messages/send-business`
+        : `${API_URL}/messages/send`;
 
       const response = await axios.post(
         endpoint,

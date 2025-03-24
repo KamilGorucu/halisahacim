@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import Recaptcha from './Recaptcha';
 import '../css/BusinessRegister.css'
-
+const API_URL = process.env.REACT_APP_API_URL;
 const containerStyle = {
   width: '100%',
   height: '300px',
@@ -121,10 +121,10 @@ const BusinessRegister = () => {
     const cleanedFormData = {
       ...formData,
       email: formData.email.trim().toLowerCase(),
-    password: formData.password.trim().replace(/['"]+/g, ''),
-    ownerName: formData.ownerName.trim().replace(/['"]+/g, ''),
-    businessName: formData.businessName.trim().replace(/['"]+/g, ''),
-    equipment: formData.equipment.trim().replace(/['"]+/g, ''),
+      password: formData.password.trim().replace(/['"]+/g, ''),
+      ownerName: formData.ownerName.trim().replace(/['"]+/g, ''),
+      businessName: formData.businessName.trim().replace(/['"]+/g, ''),
+      equipment: formData.equipment.trim().replace(/['"]+/g, ''),
     };
   
     const formDataWithPhotos = new FormData();
@@ -140,7 +140,7 @@ const BusinessRegister = () => {
     });
   
     try {
-      const response = await fetch('http://localhost:5002/api/business/register', {
+      const response = await fetch(`${API_URL}/business/register`, {
         method: 'POST',
         body: formDataWithPhotos,
       });

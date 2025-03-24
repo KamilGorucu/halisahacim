@@ -1,17 +1,30 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
+import Recaptcha from '../components/Recaptcha';
 import '../css/UserLogin.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const UserLogin = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    // recaptchaToken: '',
+  });
   const { login } = useContext(AuthContext); // AuthContext'ten `login` alınıyor.
   const navigate = useNavigate();
 
+  // const handleRecaptchaVerify = (token) => {
+  //   setFormData((prev) => ({ ...prev, recaptchaToken: token }));
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // if (!formData.recaptchaToken) {
+    //   alert('Lütfen reCAPTCHA doğrulamasını tamamlayın!');
+    //   return;
+    // }
     try {
-      const response = await fetch('http://localhost:5002/api/users/login', {
+      const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -52,6 +65,7 @@ const UserLogin = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
         />
+        {/* <Recaptcha onVerify={handleRecaptchaVerify} /> */}
         <button className="login-button" type="submit">Giriş Yap</button>
       </form>
     </div>

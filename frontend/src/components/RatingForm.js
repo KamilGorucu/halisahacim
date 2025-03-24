@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../css/RatingForm.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const RatingForm = ({ userId, onRatingSubmit }) => {
   const [score, setScore] = useState(5);
   const [message, setMessage] = useState('');
@@ -9,7 +9,7 @@ const RatingForm = ({ userId, onRatingSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5002/api/rating/rate', { userId, score }, {
+      await axios.post(`${API_URL}/rating/rate`, { userId, score }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const TournamentList = () => {
   const [tournaments, setTournaments] = useState([]);
   const [city, setCity] = useState('');
@@ -9,7 +9,7 @@ const TournamentList = () => {
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
-        const response = await fetch(`http://localhost:5002/api/tournaments?city=${city}`);
+        const response = await fetch(`${API_URL}/tournaments?city=${city}`);
         const data = await response.json();
         setTournaments(data);
       } catch (error) {

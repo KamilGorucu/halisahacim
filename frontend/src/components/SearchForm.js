@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/SearchForm.css'
-
+const API_URL = process.env.REACT_APP_API_URL;
 const SearchForm = () => {
   const [city, setCity] = useState('');
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const SearchForm = () => {
     e.preventDefault();
     const encodedCity = encodeURIComponent(city.trim());
     try {
-      const response = await fetch(`http://localhost:5002/api/business/search?city=${encodedCity}`);
+      const response = await fetch(`${API_URL}/business/search?city=${encodedCity}`);
       const data = await response.json();
 
       if (response.ok) {

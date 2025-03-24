@@ -120,6 +120,7 @@ exports.loginBusiness = async (req, res) => {
         email: business.email, 
         role: 'business',
         isActive: business.isActive, // isActive burada encode edilmeli 
+        isApproved: business.isApproved,
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
@@ -130,6 +131,7 @@ exports.loginBusiness = async (req, res) => {
       token,
       role: 'business',
       isActive: business.isActive,
+      isApproved: business.isApproved,
       business: {
         id: business._id,
         name: business.businessName,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../css/AvailableSlotsTable.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const AvailableSlotsTable = () => {
   const [slots, setSlots] = useState([]); // Boş ve dolu saatlerin listesi
   const location = useLocation();
@@ -16,7 +16,7 @@ const AvailableSlotsTable = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5002/api/reservations/available-slots?businessId=${business._id}&date=${selectedDate}`,
+        `${API_URL}/reservations/available-slots?businessId=${business._id}&date=${selectedDate}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -39,7 +39,7 @@ const AvailableSlotsTable = () => {
   // Rezervasyon yapma işlemi
   const handleReservation = async (fieldName, timeSlot) => {
     try {
-      const response = await fetch('http://localhost:5002/api/reservations/create', {
+      const response = await fetch('${API_URL}/reservations/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ const AvailableSlotsTable = () => {
             {business.photos.map((photo, index) => (
               <img
                 key={index}
-                src={`http://localhost:5002/${photo}`}
+                src={`${API_URL}/${photo}`}
                 alt={`${business.businessName} Fotoğrafı`}
                 className="thumbnail"
                 onClick={() => setSelectedPhoto(photo)}
@@ -161,7 +161,7 @@ const AvailableSlotsTable = () => {
         <div className="overlay" onClick={() => setSelectedPhoto(null)}>
           <div className="modal">
             <span className="close-button" onClick={() => setSelectedPhoto(null)}>&times;</span>
-            <img src={`http://localhost:5002/${selectedPhoto}`} alt="Büyük Fotoğraf" className="large-photo" />
+            <img src={`${API_URL}/${selectedPhoto}`} alt="Büyük Fotoğraf" className="large-photo" />
           </div>
         </div>
       )}

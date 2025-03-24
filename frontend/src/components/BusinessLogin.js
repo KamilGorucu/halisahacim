@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 import Recaptcha from './Recaptcha';
 import '../css/BusinessLogin.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const BusinessLogin = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -23,7 +23,7 @@ const BusinessLogin = () => {
     const normalizedEmail = formData.email.trim().toLowerCase();
   
     try {
-      const response = await fetch('http://localhost:5002/api/business/login', {
+      const response = await fetch(`${API_URL}/business/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, email: normalizedEmail, }),

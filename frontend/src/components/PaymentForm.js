@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 import { useEffect } from 'react';
 import '../css/PaymentForm.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const PaymentForm = () => {
   const { business } = useContext(AuthContext); // İşletme bilgilerini al.
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ const PaymentForm = () => {
         throw new Error('❌ İşletme ID eksik! Lütfen tekrar giriş yapın.');
       }
 
-      const response = await fetch('http://localhost:5002/api/payments/create-payment', {
+      const response = await fetch(`${API_URL}/payments/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

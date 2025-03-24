@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/BusinessProfile.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const BusinessProfile = () => {
   const [formData, setFormData] = useState({
     businessName: '',
@@ -21,7 +21,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch('http://localhost:5002/api/profile/business', {
+      const response = await fetch(`${API_URL}/api/profile/business`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await response.json();
@@ -84,7 +84,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch(`http://localhost:5002/api/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
+      const response = await fetch(`${API_URL}/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await response.json();
@@ -112,7 +112,7 @@ const BusinessProfile = () => {
       console.log("Start Date:", startDate); // Haftanın başlangıç tarihi
       console.log("End Date:", endDate);     // Haftanın bitiş tarihi
       const response = await fetch(
-        `http://localhost:5002/api/reservations/weekly?businessId=${businessId}&startDate=${startDate}&endDate=${endDate}`,
+        `${API_URL}/reservations/weekly?businessId=${businessId}&startDate=${startDate}&endDate=${endDate}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -174,7 +174,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch('http://localhost:5002/api/reservations/approve', {
+      const response = await fetch(`${API_URL}/reservations/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
@@ -199,7 +199,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch('http://localhost:5002/api/reservations/reject', {
+      const response = await fetch(`${API_URL}/reservations/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
@@ -221,7 +221,7 @@ const BusinessProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5002/api/business/update', {
+      const response = await fetch(`${API_URL}/business/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

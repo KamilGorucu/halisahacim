@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
 import '../css/AdminDashboard.css';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminDashboard = () => {
   const [businesses, setBusinesses] = useState([]);
@@ -20,7 +21,7 @@ const AdminDashboard = () => {
     const fetchBusinesses = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:5002/api/admin/pending-businesses", {
+        const response = await axios.get(`${$API_URL}/admin/pending-businesses`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBusinesses(response.data);
@@ -34,7 +35,7 @@ const AdminDashboard = () => {
   const approveBusiness = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:5002/api/admin/approve/${id}`, {}, {
+      await axios.put(`${API_URL}/admin/approve/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBusinesses(businesses.filter((b) => b._id !== id));
@@ -87,7 +88,7 @@ const AdminDashboard = () => {
             <h4 className="section-subtitle">Fotoğraflar</h4>
             <div className="image-gallery">
               {business.photos.map((photo, index) => (
-                <img key={index} src={`http://localhost:5002/${photo}`} alt="İşletme Fotoğrafı" className="business-photo" />
+                <img key={index} src={`${API_URL}/${photo}`} alt="İşletme Fotoğrafı" className="business-photo" />
               ))}
             </div>
 

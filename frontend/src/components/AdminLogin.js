@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
 import '../css/AdminLogin.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const AdminLogin = () => {
   const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5002/api/admin/login", { email, password });
+      const response = await axios.post(`${API_URL}/admin/login`, { email, password });
       login(response.data.token);
       navigate("/admin");
     } catch (err) {

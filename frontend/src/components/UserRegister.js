@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/UserRegister.css'; // CSS dosyasını dahil ettik
 import Recaptcha from '../components/Recaptcha';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const UserRegister = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -26,7 +26,7 @@ const UserRegister = () => {
     //   return;
     // }
     try {
-      const response = await fetch('http://localhost:5002/api/users/register', {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

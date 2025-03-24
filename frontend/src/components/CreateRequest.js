@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../css/CreateRequest.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const CreateRequest = () => {
   const [type, setType] = useState('findOpponent');
   const [teamSize, setTeamSize] = useState('');
@@ -23,7 +23,7 @@ const CreateRequest = () => {
     };
 
     try {
-      await axios.post('http://localhost:5002/api/requests', requestData, {
+      await axios.post(`${API_URL}/requests`, requestData, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       alert('Talep başarıyla oluşturuldu!');

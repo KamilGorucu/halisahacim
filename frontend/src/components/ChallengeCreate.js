@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const ChallengeCreate = () => {
   const [formData, setFormData] = useState({
     type: 'rakip-bul',
@@ -13,7 +13,7 @@ const ChallengeCreate = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5002/api/challenges/create', {
+      const response = await fetch(`${API_URL}/api/challenges/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

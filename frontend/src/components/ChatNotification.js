@@ -3,7 +3,7 @@ import axios from 'axios';
 import ChatBox from './ChatBox';
 import AuthContext from '../contexts/AuthContext';
 import '../css/ChatNotification.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const ChatNotification = () => {
   const { user, business } = useContext(AuthContext);
   const [unreadMessages, setUnreadMessages] = useState({});
@@ -16,8 +16,8 @@ const ChatNotification = () => {
   const fetchUnreadMessages = async () => {
     try {
       const endpoint = isBusiness
-        ? 'http://localhost:5002/api/messages/unread-business'
-        : 'http://localhost:5002/api/messages/unread';
+        ? `${API_URL}/messages/unread-business`
+        : `${API_URL}/messages/unread`;
 
       const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -47,8 +47,8 @@ const ChatNotification = () => {
   const markMessagesAsRead = async (chatUserId) => {
     try {
       const endpoint = isBusiness
-        ? 'http://localhost:5002/api/messages/mark-read-business'
-        : 'http://localhost:5002/api/messages/mark-read';
+        ? `${API_URL}/messages/mark-read-business`
+        : `${API_URL}/messages/mark-read`;
 
       await axios.post(
         endpoint,

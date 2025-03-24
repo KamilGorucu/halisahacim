@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const TournamentCreate = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -12,7 +12,7 @@ const TournamentCreate = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5002/api/tournaments/create', {
+      const response = await fetch(`${API_URL}/tournaments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

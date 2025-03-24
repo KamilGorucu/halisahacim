@@ -1,13 +1,13 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const TournamentDetails = () => {
   const location = useLocation();
   const tournament = location.state?.tournament;
 
   const handleRegister = async () => {
     try {
-      const response = await fetch('http://localhost:5002/api/tournaments/register', {
+      const response = await fetch(`${API_URL}/tournaments/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

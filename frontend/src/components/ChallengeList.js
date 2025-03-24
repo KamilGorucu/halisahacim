@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
+const API_URL = process.env.REACT_APP_API_URL;
 const ChallengeList = () => {
   const [challenges, setChallenges] = useState([]);
   const [filter, setFilter] = useState('rakip-bul');
-
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        const response = await fetch(`http://localhost:5002/api/challenges?type=${filter}`);
+        const response = await fetch(`${API_URL}/challenges?type=${filter}`);
         const data = await response.json();
         if (response.ok) {
           setChallenges(data);

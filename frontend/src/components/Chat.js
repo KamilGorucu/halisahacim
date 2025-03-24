@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import ChatBox from './ChatBox';
 import AuthContext from '../contexts/AuthContext';
 import '../css/Chat.css';
-
-const socket = socketIOClient('http://localhost:5002');
+const API_URL = process.env.REACT_APP_API_URL;
+const socket = socketIOClient(`${API_URL}`);
 
 const Chat = () => {
   const { user, business } = useContext(AuthContext);
@@ -22,8 +22,8 @@ const Chat = () => {
     const fetchChats = async () => {
       try {
         const endpoint = isBusiness
-          ? 'http://localhost:5002/api/messages/chat-list-business'
-          : 'http://localhost:5002/api/messages/chat-list';
+          ? `${API_URL}/messages/chat-list-business`
+          : `${API_URL}/messages/chat-list`;
 
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -43,8 +43,8 @@ const Chat = () => {
     const fetchUnreadCounts = async () => {
       try {
         const endpoint = isBusiness
-          ? 'http://localhost:5002/api/messages/unread-business'
-          : 'http://localhost:5002/api/messages/unread';
+          ? `${API_URL}/messages/unread-business`
+          : `${API_URL}/messages/unread`;
 
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -82,8 +82,8 @@ const Chat = () => {
 
     try {
       const endpoint = isBusiness
-        ? 'http://localhost:5002/api/messages/mark-read-business'
-        : 'http://localhost:5002/api/messages/mark-read';
+        ? `${API_URL}/messages/mark-read-business`
+        : `${API_URL}/messages/mark-read`;
 
       await axios.post(endpoint, { chatUserId: chat.id }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },

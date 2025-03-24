@@ -27,7 +27,7 @@ import UserView from './components/UserView';
 import TeamRequests from './components/TeamRequests';
 import AdminDashboard from './components/AdminDashboard';
 import AdminLogin from "./components/AdminLogin";
-
+const API_URL = process.env.REACT_APP_API_URL;
 function App() {
   const { user, business, admin, logout } = useContext(AuthContext);
 
@@ -84,8 +84,8 @@ const Navigation = () => {
     const fetchUnreadMessages = async () => {
       try {
         const endpoint = isBusiness
-          ? 'http://localhost:5002/api/messages/unread-business'
-          : 'http://localhost:5002/api/messages/unread';
+          ? `${API_URL}/messages/unread-business`
+          : `${API_URL}/messages/unread`;
 
         const response = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },

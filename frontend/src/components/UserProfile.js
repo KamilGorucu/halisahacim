@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/UserProfile.css';
-
+const API_URL = process.env.REACT_APP_API_URL;
 const UserProfile = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -13,7 +13,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('http://localhost:5002/api/profile/user', {
+        const response = await fetch(`${API_URL}/profile/user`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (!response.ok) {
@@ -33,7 +33,7 @@ const UserProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5002/api/profile/user/update', {
+      const response = await fetch(`${API_URL}/profile/user/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
