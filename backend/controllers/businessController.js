@@ -2,7 +2,7 @@ const Business = require('../models/Business');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const verifyRecaptcha = require('../middleware/recaptchaMiddleware');
-const sendEmail = require('../utils/sendEmail');
+// const sendEmail = require('../utils/sendEmail');
 /**
  * İşletme Kaydı
  */
@@ -12,7 +12,7 @@ exports.registerBusiness = async (req, res) => {
     console.log('Gelen veri:', req.body);
 
     // Gelen verileri temizle ve parse et
-    const { ownerName, businessName, email, password, location, fields, equipment } = req.body;
+    const { ownerName, businessName, email, password, phone, address, location, fields, equipment, recaptchaToken } = req.body;
 
     const existingBusiness = await Business.findOne({ email });
       if (existingBusiness) {
@@ -21,8 +21,16 @@ exports.registerBusiness = async (req, res) => {
 
     // Gelen string verilerdeki çift tırnakları temizle
     const cleanString = (str) => (typeof str === 'string' ? str.replace(/^"|"$/g, '').trim() : str);
-
-    const cleanedCity = parsedLocation.city.charAt(0).toUpperCase() + parsedLocation.city.slice(1).toLowerCase();
+// parsedLocation doğru şekilde tanımlanıyor
+    let parsedLocation = { city: '', coordinates: [] };
+    try {
+      parsedLocation = typeof location === 'string' ? JSON.parse(location) : location;
+    } catch (err) {
+      return res.status(400).json({ message: 'Konum bilgisi geçersiz formatta!' });
+    }
+    const cleanedCity = parsedLocation?.city
+      ? parsedLocation.city.charAt(0).toUpperCase() + parsedLocation.city.slice(1).toLowerCase()
+      : 'Belirtilmemiş';
     const parsedFields = typeof fields === 'string' ? JSON.parse(fields) : fields;
 
     // Alanları temizle
@@ -41,7 +49,10 @@ exports.registerBusiness = async (req, res) => {
       !cleanedBusinessName ||
       !cleanedEmail ||
       !cleanedPassword ||
-      !cleanedCity.coordinates ||
+      !cleanString(phone) ||
+      !cleanString(address) ||
+      !Array.isArray(parsedLocation.coordinates) ||
+      parsedLocation.coordinates.length !== 2 || // Lat ve Lng varsa
       !parsedFields ||
       parsedFields.length === 0
     ) {
@@ -52,30 +63,32 @@ exports.registerBusiness = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(cleanedPassword, salt);
 
-    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+    // const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
     const newBusiness = new Business({
       ownerName: cleanedOwnerName,
       businessName: cleanedBusinessName,
       email: cleanedEmail,
       password: hashedPassword,
+      phone: cleanString(phone),
+      address: cleanString(address),
       location: {
-        city: cleanedCity.city || 'Belirtilmemiş',
+        city: cleanedCity || 'Belirtilmemiş',
         coordinates: parsedLocation.coordinates,
       },
       fields: parsedFields,
       equipment: cleanedEquipment,
       photos,
-      isActive: false,
+      isActive: true,
       isApproved: false,
       nextPaymentDate: new Date(new Date().setDate(new Date().getDate() + 30)), // İlk ödeme tarihi
-      verificationCode,
+      // verificationCode,
     });
 
     await newBusiness.save();
 
     // Telefon ve e-posta doğrulama kodları gönder
-    await sendEmail(email, 'E-posta Doğrulama Kodu', `Doğrulama Kodunuz: ${verificationCode}`);
+    // await sendEmail(email, 'E-posta Doğrulama Kodu', `Doğrulama Kodunuz: ${verificationCode}`);
     
     res.status(201).json({ message: 'İşletme kaydı başarılı!', business: newBusiness });
   // })
@@ -112,6 +125,9 @@ exports.loginBusiness = async (req, res) => {
       return res.status(401).json({ message: 'Geçersiz şifre!' });
     }
 
+    // ✅ Brute sayacını sıfırla
+    if (req.brute) await req.brute.reset();
+
     console.log('Şifre doğrulaması başarılı.');
 
     // Token oluştur
@@ -120,7 +136,7 @@ exports.loginBusiness = async (req, res) => {
         email: business.email, 
         role: 'business',
         isActive: business.isActive, // isActive burada encode edilmeli 
-        isApproved: business.isApproved,
+	      isApproved: business.isApproved,
       },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
@@ -313,7 +329,7 @@ exports.uploadPhoto = (req, res) => {
     }
     
     business.isApproved = true;
-    business.isActive = true; // ✔ İşletme artık görünür olacak
+    // business.isActive = true; // ✔ İşletme artık görünür olacak
 
     await business.save();
     res.status(200).json({ message: 'İşletme başarıyla onaylandı!', business });

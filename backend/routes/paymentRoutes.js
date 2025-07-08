@@ -1,8 +1,10 @@
 const express = require('express');
-const { createPayment } = require('../controllers/paymentController'); // Ödeme fonksiyonu
+const { initializeCheckoutForm, paymentCallback } = require('../controllers/paymentController'); // Ödeme fonksiyonu
 const router = express.Router();
 
 // Ödeme oluşturma rotası
-router.post('/create-payment', createPayment);
+router.post('/initialize-checkout', initializeCheckoutForm);
+router.post('/callback', paymentCallback);
+// router.get('/callback', paymentCallback); // ✅ GET istekleri de karşılanacak
 
 module.exports = router;

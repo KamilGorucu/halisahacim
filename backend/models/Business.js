@@ -24,6 +24,8 @@ const BusinessSchema = new mongoose.Schema({
   businessName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  phone: { type: String, required: true }, // ✅ yeni eklendi
+  address: { type: String, required: true }, // ✅ yeni eklendi
   location: {
     type: {
       type: String,
@@ -36,7 +38,7 @@ const BusinessSchema = new mongoose.Schema({
   fields: [FieldSchema],
   equipment: { type: String },
   photos: [{ type: String }],
-  isActive: { type: Boolean, default: false }, // Varsayılan olarak true
+  isActive: { type: Boolean, default: true }, // Varsayılan olarak true
   isApproved: { type: Boolean, default: false }, // Admin onayı olmadan yayına çıkmasın
   nextPaymentDate: { type: Date }, // Bir sonraki ödeme tarihi
   ratings: [RatingSchema],

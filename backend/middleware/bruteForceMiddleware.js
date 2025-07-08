@@ -10,4 +10,5 @@ exports.bruteForceProtector = new ExpressBrute(bruteStore, {
   failCallback: (req, res) => {
     res.status(429).json({ message: "Çok fazla başarısız giriş denemesi. Lütfen 5 dakika sonra tekrar deneyin." });
   },
+  attachResetToRequest: true,
 });

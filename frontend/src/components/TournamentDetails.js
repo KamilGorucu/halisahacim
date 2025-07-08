@@ -7,7 +7,7 @@ const TournamentDetails = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await fetch(`${API_URL}/tournaments/register`, {
+      const response = await fetch(`${API_URL}/api/tournaments/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

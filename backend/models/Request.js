@@ -18,6 +18,10 @@ const RequestSchema = new mongoose.Schema({
   teamSize: {
     type: String, // Örneğin: 5v5, 7v7 (Sadece Rakip Bul için)
   },
+  lineupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lineup',
+  },
   position: {
     type: String,
   },

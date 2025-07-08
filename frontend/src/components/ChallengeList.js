@@ -7,7 +7,7 @@ const ChallengeList = () => {
   useEffect(() => {
     const fetchChallenges = async () => {
       try {
-        const response = await fetch(`${API_URL}/challenges?type=${filter}`);
+        const response = await fetch(`${API_URL}/api/challenges?type=${filter}`);
         const data = await response.json();
         if (response.ok) {
           setChallenges(data);

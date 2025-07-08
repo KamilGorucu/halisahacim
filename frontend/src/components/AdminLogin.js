@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/admin/login`, { email, password });
+      const response = await axios.post(`${API_URL}/api/admin/login`, { email, password });
       login(response.data.token);
       navigate("/admin");
     } catch (err) {

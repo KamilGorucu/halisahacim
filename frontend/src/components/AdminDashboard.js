@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../contexts/AuthContext";
 import axios from "axios";
 import '../css/AdminDashboard.css';
+
 const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminDashboard = () => {
@@ -21,7 +22,7 @@ const AdminDashboard = () => {
     const fetchBusinesses = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${$API_URL}/admin/pending-businesses`, {
+        const response = await axios.get(`${API_URL}/api/admin/pending-businesses`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setBusinesses(response.data);
@@ -35,12 +36,24 @@ const AdminDashboard = () => {
   const approveBusiness = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`${API_URL}/admin/approve/${id}`, {}, {
+      await axios.put(`${API_URL}/api/admin/approve/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setBusinesses(businesses.filter((b) => b._id !== id));
     } catch (error) {
       console.error("İşletme onaylanırken hata oluştu:", error);
+    }
+  };
+
+const rejectBusiness = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/api/admin/reject/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setBusinesses(businesses.filter((b) => b._id !== id));
+    } catch (error) {
+      console.error("İşletme reddedilirken hata oluştu:", error);
     }
   };
 
@@ -57,10 +70,12 @@ const AdminDashboard = () => {
       ) : (
         businesses.map((business) => (
           <div key={business._id} className="admin-business-card">
-            <h3>{business.businessName}</h3>
+            <h3><strong>İşletme Adı:</strong>{business.businessName}</h3>
             <p><strong>İşletme Sahibi:</strong> {business.ownerName}</p>
             <p><strong>E-posta:</strong> {business.email}</p>
+            <p><strong>Telefon:</strong> {business.phone || "Belirtilmemiş"}</p> {/* ✅ Telefon bilgisi */}
             <p><strong>Şehir:</strong> {business.location.city}</p>
+            <p><strong>Adres:</strong> {business.address || "Belirtilmemiş"}</p> {/* ✅ Adres bilgisi */}
             <p><strong>Koordinatlar:</strong> {business.location.coordinates?.join(", ")}</p>
             <p><strong>Ekipmanlar:</strong> {business.equipment}</p>
             <p><strong>Ortalama Puan:</strong> {business.averageRating || "Henüz yok"}</p>
@@ -93,6 +108,7 @@ const AdminDashboard = () => {
             </div>
 
             <button onClick={() => approveBusiness(business._id)} className="approve-button">✅ Onayla</button>
+	          <button onClick={() => rejectBusiness(business._id)} className="reject-button">❌ Reddet</button>
           </div>
         ))
       )}

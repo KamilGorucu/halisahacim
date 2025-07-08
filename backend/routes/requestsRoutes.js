@@ -1,7 +1,12 @@
 // routes/requestsRoutes.js
 const express = require('express');
 const router = express.Router();
-const { createRequest, getRequests, deleteOldRequests, updateRequestStatus } = require('../controllers/requestsController');
+const { 
+    createRequest, 
+    getRequests, 
+    deleteOldRequests, 
+    updateRequestStatus,
+    getSingleRequest } = require('../controllers/requestsController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Talep oluştur
@@ -15,5 +20,7 @@ router.put('/:requestId/status', protect, updateRequestStatus);
 
 // Talep sil
 router.delete('/:requestId', deleteOldRequests);
+
+router.get('/:requestId', protect, getSingleRequest);
 
 module.exports = router;

@@ -1,0 +1,225 @@
+:root {
+    --scale: 1;
+}
+
+.create-lineup-container {
+    padding: calc(20px * var(--scale));
+    max-width: 1240px;
+    margin: 0 auto;
+}
+
+.create-lineup-container input {
+    padding: calc(10px * var(--scale));
+    margin-bottom: calc(10px * var(--scale));
+    font-size: calc(16px * var(--scale));
+    width: 100%;
+    border: calc(1px * var(--scale)) solid #ccc;
+    border-radius: calc(6px * var(--scale));
+}
+
+.field-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin: calc(20px * var(--scale)) auto;
+    background-color: #444;
+    border: calc(3px * var(--scale)) solid #1a1a1a;
+    border-radius: calc(12px * var(--scale));
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.field-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.position-slot {
+    position: absolute;
+    width: calc(120px * var(--scale));
+    height: calc(104px * var(--scale)); /* Eğer kare değilse yüksekliği orantılayabilirsin */
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    z-index: 10;
+}
+
+.position-slot select {
+    margin-top: calc(5px * var(--scale));
+    padding: calc(5px * var(--scale));
+    font-size: calc(12px * var(--scale));
+    border-radius: calc(5px * var(--scale));
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.add-button {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: calc(6px * var(--scale)) calc(12px * var(--scale));
+    border: none;
+    border-radius: calc(6px * var(--scale));
+    cursor: pointer;
+    font-size: calc(12px * var(--scale));
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.add-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.remove-button {
+    position: absolute;
+    top: calc(-10px * var(--scale));
+    left: calc(-10px * var(--scale));
+    background: red;
+    color: white;
+    border-radius: 50%;
+    width: calc(18px * var(--scale));
+    height: calc(18px * var(--scale));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(12px * var(--scale));
+    cursor: pointer;
+    z-index: 20;
+}
+
+.create-lineup-container button {
+    display: block;
+    margin: calc(20px * var(--scale)) auto;
+    padding: calc(12px * var(--scale)) calc(24px * var(--scale));
+    font-size: calc(16px * var(--scale));
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: calc(8px * var(--scale));
+    cursor: pointer;
+}
+
+.create-lineup-container button:hover {
+    background-color: #218838;
+}
+
+.lineup-note {
+    margin-bottom: calc(15px * var(--scale));
+    background: #f1f8e9;
+    color: #4caf50;
+    padding: calc(10px * var(--scale)) calc(15px * var(--scale));
+    border-left: calc(5px * var(--scale)) solid #4caf50;
+    border-radius: calc(6px * var(--scale));
+    font-size: calc(14px * var(--scale));
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--scale));
+    box-shadow: 0 0 calc(5px * var(--scale)) rgba(0,0,0,0.1);
+}
+
+.field-wrapper .fifa-card,
+.position-slot .fifa-card {
+    width: calc(9.68vw); /* 120/1240 */
+    padding: calc(0.48vw);
+    box-sizing: border-box;
+    border-radius: calc(0.97vw);
+    font-size: calc(0.8vw);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.field-wrapper .fifa-header,
+.position-slot .fifa-header {
+    font-size: calc(1.13vw);
+    font-weight: bold;
+    padding: 0 calc(0.32vw);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field-wrapper .fifa-name,
+.position-slot .fifa-name {
+    font-size: calc(0.97vw);
+    font-weight: bold;
+    margin: calc(0.48vw) 0;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.field-wrapper .fifa-position,
+.position-slot .fifa-position {
+    font-size: calc(0.9vw);
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: right;
+    color: #fff;
+    letter-spacing: calc(0.1vw);
+}
+
+.field-wrapper .fifa-stats,
+.position-slot .fifa-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(0.32vw);
+    font-size: calc(0.88vw);
+    text-align: left;
+    padding-left: calc(0.32vw);
+    align-items: center;
+}
+
+.field-wrapper .fifa-stats div:last-child {
+    grid-column: 1 / 3; /* Ayak bilgisini tüm satıra yay */
+    display: flex;
+    justify-content: center;
+    font-size: calc(0.8vw);
+    margin-top: calc(0.3vw);
+    color: #fff;
+}
+
+/* ✅ Yan yana yapmak için: */
+.field-wrapper .fifa-stats div.foot-info {
+    grid-column: 1 / 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(0.9vw);
+    margin-top: calc(0.3vw);
+    color: #fff;
+    gap: calc(0.5vw);
+}
+
+/* FOTO daha büyük olsun diye: */
+.field-wrapper .fifa-photo,
+.position-slot .fifa-photo {
+    width: 100%;
+    aspect-ratio: 3 / 3.5; /* 3/4'tü, biraz büyüttüm */
+    border-radius: calc(0.8vw);
+    overflow: hidden;
+    margin: calc(0.48vw) 0;
+    background: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.field-wrapper .fifa-photo img,
+.position-slot .fifa-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.field-wrapper .placeholder,
+.position-slot .placeholder {
+    font-size: calc(3.87vw);
+    color: #ccc;
+    text-align: center;
+}

@@ -1,23 +1,26 @@
 const express = require('express');
-const { registerUser, loginUser } = require('../controllers/userController');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 const { userLimiter } = require('../middleware/rateLimitMiddleware'); // Rate limiter middleware
 const { bruteForceProtector } = require('../middleware/bruteForceMiddleware');
-const { getUserProfile, updateUserProfile, getPublicUserProfile } = require('../controllers/userController');
+const { registerUser, loginUser, getUserProfile, updateUserProfile, getPublicUserProfile, searchUsersByCity } = require('../controllers/userController');
 
 // Kullanıcı Kayıt Rotası
-router.post('/register', userLimiter, registerUser);
+router.post('/register', upload.single('photo'), userLimiter, registerUser);
 
 // Kullanıcı Giriş Rotası
 router.post('/login', bruteForceProtector.prevent, userLimiter, loginUser);
 
+// 🔥 Şehre göre kullanıcı arama (Eksik olan buydu!)
+router.get('/search', protect, searchUsersByCity);
+
 // Kullanıcı profil bilgileri
 router.get('/profile', protect, getUserProfile);
 
-router.get('/:userId', protect, getPublicUserProfile);
-
 // Kullanıcı profil güncelleme
 router.put('/profile/update', protect, updateUserProfile);
+
+router.get('/:userId', protect, getPublicUserProfile);
 
 module.exports = router;

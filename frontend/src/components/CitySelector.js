@@ -16,11 +16,11 @@ const CitySelector = ({ selectedCity, setSelectedCity }) => {
   ];
 
   return (
-    <div className="city-selector-container">
-      <label htmlFor="city" className="city-label">Şehir:</label>
+    <div className="mb-3">
+      <label htmlFor="city" className="form-label fw-semibold">Şehir:</label>
       <select
         id="city"
-        className="city-dropdown"
+        className="form-select"
         value={selectedCity}
         onChange={(e) => setSelectedCity(e.target.value)}
       >

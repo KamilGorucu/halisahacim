@@ -12,7 +12,7 @@ const TournamentCreate = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${API_URL}/tournaments/create`, {
+      const response = await fetch(`${API_URL}/api/tournaments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

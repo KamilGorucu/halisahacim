@@ -16,8 +16,8 @@ const ChatNotification = () => {
   const fetchUnreadMessages = async () => {
     try {
       const endpoint = isBusiness
-        ? `${API_URL}/messages/unread-business`
-        : `${API_URL}/messages/unread`;
+        ? `${API_URL}/api/messages/unread-business`
+        : `${API_URL}/api/messages/unread`;
 
       const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -47,8 +47,8 @@ const ChatNotification = () => {
   const markMessagesAsRead = async (chatUserId) => {
     try {
       const endpoint = isBusiness
-        ? `${API_URL}/messages/mark-read-business`
-        : `${API_URL}/messages/mark-read`;
+        ? `${API_URL}/api/messages/mark-read-business`
+        : `${API_URL}/api/messages/mark-read`;
 
       await axios.post(
         endpoint,

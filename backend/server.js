@@ -20,6 +20,9 @@ const challengeRoutes = require('./routes/challengeRoutes');
 const messageRoutes = require('./routes/messageRoutes'); // Mesaj rotaları
 const requestsRoutes = require('./routes/requestsRoutes');
 const adminRoutes = require("./routes/adminRoutes");
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const matchRoutes = require('./routes/matchRoutes');
+const friendRoutes = require('./routes/friendRoutes'); // 🆕 Ekledik
 
 const app = express();
 
@@ -29,24 +32,8 @@ if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-// 🌍 CORS Güncellemesi (Sadece belirli domainlerden istek kabul et)
-const allowedOrigins = [
-  "http://xn--halsahacm-xpbf.com",
-  "https://www.xn--halsahacm-xpbf.com",
-  "https://admin.xn--halsahacm-xpbf.com",
-  "http://localhost:3000", // React frontend çalıştırıyorsan
-  "http://localhost:5002", // API backend için
-];
-
-// Middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS hatası: Bu kaynaktan gelen istekler engellendi.'));
-    }
-  },
+  origin: process.env.CLIENT_URL,
   credentials: true,
 }));
 app.use(express.json());
@@ -60,8 +47,8 @@ app.use(express.urlencoded({ extended: true }));
 //   next();
 // });
 
-app.use("/api/admin", adminRoutes);
 
+app.use("/api/admin", adminRoutes);
 // Public dosyalar için statik yol
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -78,6 +65,10 @@ app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/challenges', challengeRoutes);
 app.use('/api/messages', messageRoutes); // Mesaj rotaları
 app.use('/api/requests', requestsRoutes);
+app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/matches', matchRoutes);
+app.use('/api/friends', friendRoutes);
+app.use('/api/lineups', require('./routes/lineupRoutes'));
 
 app.use(ipBlacklist); // Tüm API isteklerinde IP kontrolü yap
 // API Test
@@ -122,7 +113,7 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', ({ senderId, receiverId, content }) => {
     const receiverSocketId = activeUsers[receiverId];
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit('receiveMessage', { senderId, content });
+      io.to(receiverSocketId).emit('receiveMessage', { sender: senderId, receiver: receiverId, content });
       console.log('Mesaj iletildi:', { senderId, receiverId, content });
     }
   });

@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ChatBox from './ChatBox';
 import '../css/BusinessProfile.css';
+
 const API_URL = process.env.REACT_APP_API_URL;
+
 const BusinessProfile = () => {
   const [formData, setFormData] = useState({
     businessName: '',
     fields: [],
   });
   const [reservations, setReservations] = useState([]); // Rezervasyonları tutar.
-  const [weeklySlots, setWeeklySlots] = useState([]); // Haftalık görünüm için saat aralıkları
-  const [weekOffset, setWeekOffset] = useState(0); // Geçmiş/gelecek haftalar için kaydırma
+  const [dailySlots, setDailySlots] = useState([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [isUpdating, setIsUpdating] = useState(false); // Güncelleme alanını aç/kapat
-  // const [isActive, setIsActive] = useState(false); // İşletme aktif durumu
+  const [isActive, setIsActive] = useState(true); // İşletme aktif durumu
+  const [showChatBox, setShowChatBox] = useState(false);
+  const [receiverId, setReceiverId] = useState(null);
+  const [receiverModel, setReceiverModel] = useState('User');
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async () => {
@@ -26,7 +32,11 @@ const BusinessProfile = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Profil alınamadı.');
-      // setIsActive(data.isActive); // İşletme aktiflik durumunu kaydet
+      setIsActive(data.isActive); // İşletme aktiflik durumunu kaydet
+     /* if (!data.isActive) {
+        navigate('/payment'); // ❌ Aktif değilse ödeme sayfasına yönlendir
+        return;
+      }*/
       setFormData({
         businessName: data.businessName || '',
         // location: data.location || { city: '', coordinates: [] },
@@ -84,7 +94,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch(`${API_URL}/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
+      const response = await fetch(`${API_URL}/api/reservations/business-reservations?businessId=${localStorage.getItem('businessId')}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await response.json();
@@ -99,37 +109,17 @@ const BusinessProfile = () => {
   },[navigate]);
 
 
-  const fetchWeeklySlots = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const businessId = localStorage.getItem('businessId');
-      if (!token || !businessId) {
-        navigate('/login');
-        return;
-      }
-      const startDate = getStartOfWeek(weekOffset);
-      const endDate = getEndOfWeek(weekOffset);
-      console.log("Start Date:", startDate); // Haftanın başlangıç tarihi
-      console.log("End Date:", endDate);     // Haftanın bitiş tarihi
-      const response = await fetch(
-        `${API_URL}/reservations/weekly?businessId=${businessId}&startDate=${startDate}&endDate=${endDate}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Güncellenmiş WeeklySlots:", data.weeklyData);
-        setWeeklySlots(data.weeklyData || []);
-      } else {
-        console.error('Haftalık veriler alınamadı:', data.message);
-      }
-    } catch (error) {
-      console.error('Haftalık veriler alınamadı:', error);
-    }
-  },[weekOffset, navigate]);
+  const fetchDailySlots = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    const businessId = localStorage.getItem('businessId');
+    if (!token || !businessId) return navigate('/login');
+    const isoDate = currentDate.toISOString().split('T')[0];
+    const res = await fetch(`${API_URL}/api/reservations/daily?businessId=${businessId}&date=${isoDate}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (res.ok) setDailySlots(data.dailyData || []);
+  }, [currentDate, navigate]);
   
   useEffect(() => {
     if (!localStorage.getItem('businessId')) {
@@ -139,14 +129,17 @@ const BusinessProfile = () => {
     }
     fetchProfile();
     fetchReservations();
-    fetchWeeklySlots();
-  }, [fetchProfile,fetchReservations,fetchWeeklySlots]);
+    fetchDailySlots();
+  }, [fetchProfile,fetchReservations,fetchDailySlots]);
 
   const getStartOfWeek = (offset = 0) => {
-    const now = new Date();
-    const monday = new Date(now.setDate(now.getDate() - now.getDay() + 2 + offset * 7));
+    const today = new Date();
+    const day = today.getDay(); // 0-Pazar, 1-Pazartesi, ...
+    const diff = (day === 0 ? -6 : 1) - day;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + diff + offset * 7);
     monday.setHours(0, 0, 0, 0);
-    return monday.toISOString().split('T')[0];
+    return monday;
   };
   
   const getEndOfWeek = (offset = 0) => {
@@ -163,8 +156,10 @@ const BusinessProfile = () => {
     return date.toLocaleDateString('tr-TR', options); // Türkçe formatta döndür
   };
 
-  const handleWeekChange = (direction) => {
-    setWeekOffset((prev) => prev + direction);
+  const handleDateChange = (days) => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + days);
+    setCurrentDate(newDate);
   };
 
   const handleApprove = async (reservationId) => {
@@ -174,7 +169,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch(`${API_URL}/reservations/approve`, {
+      const response = await fetch(`${API_URL}/api/reservations/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
@@ -182,7 +177,7 @@ const BusinessProfile = () => {
       if (response.ok) {
         alert('Rezervasyon onaylandı!');
         fetchReservations(); // Listeyi güncelle
-        fetchWeeklySlots();  // ✅ **Haftalık görünümü de güncelle**
+        fetchDailySlots();  // ✅ **Haftalık görünümü de güncelle**
       } else {
         const data = await response.json();
         alert(data.message || 'Rezervasyon onaylanamadı.');
@@ -199,7 +194,7 @@ const BusinessProfile = () => {
         navigate('/login');
         return;
       }
-      const response = await fetch(`${API_URL}/reservations/reject`, {
+      const response = await fetch(`${API_URL}/api/reservations/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reservationId }),
@@ -208,7 +203,7 @@ const BusinessProfile = () => {
       if (response.ok) {
         alert('Rezervasyon reddedildi!');
         fetchReservations(); // Listeyi güncelle
-        fetchWeeklySlots();  // ✅ **Haftalık görünümü de güncelle**
+        fetchDailySlots();  // ✅ **Haftalık görünümü de güncelle**
       } else {
         const data = await response.json();
         alert(data.message || 'Rezervasyon reddedilemedi.');
@@ -218,10 +213,36 @@ const BusinessProfile = () => {
     }
   };
 
+  const handleDelete = async (reservationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+  
+      const response = await fetch(`${API_URL}/api/reservations/${reservationId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (response.ok) {
+        alert('Rezervasyon silindi ve saat tekrar kullanılabilir hale getirildi.');
+        fetchReservations(); // Listeyi güncelle
+        fetchDailySlots();  // Slotları güncelle
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Silme işlemi başarısız.');
+      }
+    } catch (error) {
+      console.error('Silme hatası:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}/business/update`, {
+      const response = await fetch(`${API_URL}/api/business/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -240,24 +261,24 @@ const BusinessProfile = () => {
     }
   };
 
-  const calculateWeeklyEarnings = () => {
-    let totalEarnings = 0;
+  // const calculateWeeklyEarnings = () => {
+  //   let totalEarnings = 0;
   
-    weeklySlots.forEach(field => {
-      field.weeklyData.forEach(day => {
-        day.daySlots.forEach(slot => {
-          if (slot.status === 'approved') {  // ✅ Sadece onaylı rezervasyonları hesapla
-            const fieldData = formData.fields.find(f => f.name === field.fieldName);
-            if (fieldData) {
-              totalEarnings += fieldData.price;
-            }
-          }
-        });
-      });
-    });
+  //   dailySlots.forEach(field => {
+  //     field.weeklyData.forEach(day => {
+  //       day.daySlots.forEach(slot => {
+  //         if (slot.status === 'approved') {  // ✅ Sadece onaylı rezervasyonları hesapla
+  //           const fieldData = formData.fields.find(f => f.name === field.fieldName);
+  //           if (fieldData) {
+  //             totalEarnings += fieldData.price;
+  //           }
+  //         }
+  //       });
+  //     });
+  //   });
   
-    return totalEarnings;
-  };
+  //   return totalEarnings;
+  // };
   
   
   return (
@@ -352,42 +373,55 @@ const BusinessProfile = () => {
       </form>    
       )}
 
-      <h2 className="weekly-reservations-title">Haftalık Rezervasyon Tabloları</h2>
-      <h2 className="weekly-earnings">Haftalık Kazanç: {calculateWeeklyEarnings()} TL</h2>
-      <div className="week-navigation">
-        <button className="week-button" onClick={() => handleWeekChange(-1)}>Önceki Hafta</button>
-        <button className="week-button" onClick={() => handleWeekChange(1)}>Sonraki Hafta</button>
+      {/* <h2 className="weekly-earnings">Haftalık Kazanç: {calculateWeeklyEarnings()} TL</h2> */}
+      <h2 className="text-center my-4 text-success">Günlük Rezervasyonlar</h2>
+      <div className="d-flex justify-content-center align-items-center mb-3 gap-2">
+        <button className="btn btn-success" onClick={() => handleDateChange(-1)}>
+          Önceki Gün
+        </button>
+        <span className="fw-bold">{formatDate(currentDate.toISOString())}</span>
+        <button className="btn btn-success" onClick={() => handleDateChange(1)}>
+          Sonraki Gün
+        </button>
       </div>
 
-      {weeklySlots.length > 0 ? (
-        weeklySlots.map((field, fieldIndex) => (
-          <div key={fieldIndex} className="weekly-reservations-container">
-            <h3 className="field-title">{field.fieldName} - Kapasite: {field.capacity}</h3>
-            <div className="table-responsive"> {/* ✅ Yeni bir div ekledik */}
-              <table className="weekly-table">
-                <thead>
+      {dailySlots.length > 0 ? (
+        dailySlots.map((field, fieldIndex) => (
+          <div key={fieldIndex} className="card mb-4 shadow-sm">
+            <div className="card-header bg-success text-white">
+              <h5 className="mb-0">{field.fieldName} - Kapasite: {field.capacity}</h5>
+            </div>
+            <div className="table-responsive">
+              <table className="table table-bordered mb-0">
+                <thead className="table-light">
                   <tr>
-                    <th className="weekly-header">Tarih</th>
-                    {field.weeklyData[0]?.daySlots?.map((slot, index) => (
-                      <th key={index} className="weekly-header">{slot.timeSlot || "Saat Yok"}</th>
-                    ))}
+                    <th scope="col">Saat</th>
+                    <th scope="col">Durum</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {field.weeklyData.map((day, index) => (
-                    <tr key={index} className="weekly-row">
-                      <td className="weekly-date">{formatDate(day.date)}</td>
-                      {day.daySlots?.map((slot, slotIndex) => (
-                        <td key={slotIndex} className={`weekly-cell ${slot.status}`}>
-                          {slot.status === 'approved' && slot.user?.fullName ? (
-                            <span className="approved-user">{slot.user.fullName}</span>
-                          ) : slot.status === 'pending' ? (
-                            <span className="pending-text">Bekliyor</span>
-                          ) : (
-                            <span className="empty-slot">Boş</span>
-                          )}
-                        </td>
-                      ))}
+                  {field.daySlots.map((slot, slotIndex) => (
+                    <tr key={slotIndex} className={slot.status === 'approved' ? 'table-success' : slot.status === 'pending' ? 'table-warning' : ''}>
+                      <td>{slot.timeSlot}</td>
+                      <td>
+                        {slot.status === 'approved' && slot.user?.fullName ? (
+                          <>
+                            <strong>{slot.user.fullName}</strong>
+                            {slot.reservationId && (
+                              <button
+                                className="btn btn-sm btn-danger ms-2"
+                                onClick={() => handleDelete(slot.reservationId)}
+                              >
+                                🗑️ Sil
+                              </button>
+                            )}
+                          </>
+                        ) : slot.status === 'pending' ? (
+                          <span className="text-warning fw-bold">Bekliyor</span>
+                        ) : (
+                          <span className="text-muted">Boş</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -396,43 +430,76 @@ const BusinessProfile = () => {
           </div>
         ))
       ) : (
-        <p className="no-reservations">Henüz veri bulunmamaktadır.</p>
+        <p className="text-center text-muted">Bugün için veri yok.</p>
       )}
 
       <div className="reservation-requests-container">
         <h2 className="reservation-requests-title">Rezervasyon İstekleri</h2>
+	      <p style = {{textAlign: 'center'}}>7 günü geçmiş istekler otomatik olarak silinir</p>
         {reservations.length === 0 ? (
           <p className="no-requests">Henüz rezervasyon isteği yok.</p>
         ) : (
-          <ul className="reservation-list">
-            {reservations.map((res) => (
-              <li key={res._id} className="reservation-item">
-                <p className="reservation-info">
-                  <strong>Kullanıcı:</strong> {res.user.fullName} ({res.user.email})
+          <ul className="list-group">
+            {reservations
+            .filter((res) => {
+              const resDate = new Date(res.date).toISOString().split('T')[0];
+              const currentISO = currentDate.toISOString().split('T')[0];
+              return resDate === currentISO;
+            })
+            .map((res) => (
+              <li key={res._id} className="list-group-item mb-3 shadow-sm rounded">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h6 className="mb-0 text-success">
+                    <i className="bi bi-person-fill me-1"></i>
+                    {res.user?.fullName || 'Kullanıcı yok'} ({res.user?.email || 'Email yok'})
+                  </h6>
+                </div>
+
+                <p className="mb-1"><strong>📞 Telefon:</strong> {res.user?.phone || 'Belirtilmemiş'}</p>
+                <p className="mb-1"><strong>🏟 Halı Saha:</strong> {res.fieldName}</p>
+                <p className="mb-1"><strong>📅 Tarih:</strong> {formatDate(res.date)}</p>
+                <p className="mb-1"><strong>🕒 Saat:</strong> {res.timeSlot}</p>
+                <p className="mb-2">
+                  <strong>📌 Durum:</strong>{' '}
+                  <span className={`badge ${res.status === 'approved' ? 'bg-success' : res.status === 'pending' ? 'bg-warning text-dark' : 'bg-danger'}`}>
+                    {res.status}
+                  </span>
                 </p>
-                <p className="reservation-info">
-                  <strong>Halı Saha:</strong> {res.fieldName}
-                </p>
-                <p className="reservation-info">
-                  <strong>Tarih:</strong> {formatDate(res.date)}
-                </p>
-                <p className="reservation-info">
-                  <strong>Saat:</strong> {res.timeSlot}
-                </p>
-                <p className={`reservation-status ${res.status}`}>
-                  <strong>Durum:</strong> {res.status}
-                </p>
-                {res.status === 'pending' && (
-                  <div className="reservation-buttons">
-                    <button className="approve-button" onClick={() => handleApprove(res._id)}>Onayla</button>
-                    <button className="reject-button" onClick={() => handleReject(res._id)}>Reddet</button>
-                  </div>
-                )}
+
+                <div className="d-flex flex-wrap gap-2">
+                  {res.status === 'pending' && (
+                    <>
+                      <button className="btn btn-sm btn-outline-success" onClick={() => handleApprove(res._id)}>
+                        ✅ Onayla
+                      </button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => handleReject(res._id)}>
+                        ❌ Reddet
+                      </button>
+                    </>
+                  )}
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => {
+                      setReceiverId(res.user._id);
+                      setReceiverModel('User');
+                      setShowChatBox(true);
+                    }}
+                  >
+                    💬 Mesaj Gönder
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </div>
+      {showChatBox && (
+        <ChatBox
+          receiverId={receiverId}
+          receiverModel={receiverModel}
+          onClose={() => setShowChatBox(false)}
+        />
+      )}
     </div>
   );
 };

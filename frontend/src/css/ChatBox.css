@@ -100,6 +100,13 @@
     background-color: #388E3C;
   }
   
+  .chatbox-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+  .chatbox-messages::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
   /* Mobil Uyum */
   @media (max-width: 500px) {
     .chatbox-container {

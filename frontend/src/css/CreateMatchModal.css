@@ -1,0 +1,59 @@
+.create-match-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .create-match-modal {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .create-match-modal h3 {
+    text-align: center;
+    color: #1B5E20;
+  }
+  
+  .create-match-modal label {
+    font-weight: bold;
+  }
+  
+  .create-match-modal input,
+  .create-match-modal select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .create-match-modal button {
+    background: #1B5E20;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .create-match-modal button.close-btn {
+    background: #e53935;
+  }
+  
+  .success-msg {
+    text-align: center;
+    color: green;
+    font-weight: bold;
+  }
+  

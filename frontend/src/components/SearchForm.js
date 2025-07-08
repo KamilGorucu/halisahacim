@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/SearchForm.css'
+import CitySelector from './CitySelector';
+
 const API_URL = process.env.REACT_APP_API_URL;
+
 const SearchForm = () => {
   const [city, setCity] = useState('');
   const navigate = useNavigate();
@@ -10,7 +13,7 @@ const SearchForm = () => {
     e.preventDefault();
     const encodedCity = encodeURIComponent(city.trim());
     try {
-      const response = await fetch(`${API_URL}/business/search?city=${encodedCity}`);
+      const response = await fetch(`${API_URL}/api/business/search?city=${encodedCity}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -25,21 +28,21 @@ const SearchForm = () => {
   };
 
   return (
-    <div className="search-form-container">
-    <h2 className="search-form-title">Halısaha Ara</h2>
-    <p className="search-form-description">Lütfen şehir adını girerek halısahaları arayın. Şehir adının baş harfi büyük olmalıdır.</p>
-    <form className="search-form" onSubmit={handleSearch}>
-      <input
-        type="text"
-        className="search-input"
-        placeholder="Şehir Adı (Örn: İstanbul)"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        required
-      />
-      <button type="submit" className="search-button">Ara</button>
-    </form>
-  </div>
+    <div className="container my-5">
+      <h2 className="text-center text-success mb-2">Halısaha Ara</h2>
+      <p className="text-center text-muted mb-4">Lütfen şehir seçerek halısahaları arayın.</p>
+
+      <form onSubmit={handleSearch} className="mx-auto" style={{ maxWidth: '500px' }}>
+        <div className="mb-3">
+          {/* CitySelector bileşeni bootstrap form yapısına dahil ediliyor */}
+          <CitySelector selectedCity={city} setSelectedCity={setCity} />
+        </div>
+
+        <div className="d-grid">
+          <button type="submit" className="btn btn-success rounded-pill">Ara</button>
+        </div>
+      </form>
+    </div>
   );
 };
 

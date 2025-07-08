@@ -9,7 +9,7 @@ const RatingForm = ({ userId, onRatingSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/rating/rate`, { userId, score }, {
+      await axios.post(`${API_URL}/api/rating/rate`, { userId, score }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 

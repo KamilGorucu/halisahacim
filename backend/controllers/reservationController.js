@@ -2,6 +2,7 @@ const Reservation = require('../models/Reservation');
 const Business = require('../models/Business');
 const User = require('../models/User');
 const Message = require('../models/Message'); // Mesaj modeli eklendi
+const mongoose = require('mongoose');
 
 const getAvailableSlots = async (req, res) => {
   try {
@@ -16,24 +17,40 @@ const getAvailableSlots = async (req, res) => {
       return res.status(404).json({ message: 'Saha bilgisi bulunamadı.' });
     }
 
-    const reservations = await Reservation.find({ date, business: businessId });
+    // Bir sonraki gün
+    const selectedDate = new Date(date);
+    const nextDate = new Date(selectedDate);
+    nextDate.setDate(selectedDate.getDate() + 2);
+    nextDate.setHours(0, 0, 0, 0);
 
-    const availability = business.fields.map((field) => ({
-      fieldName: field.name,
-      capacity: field.capacity,
-      timeSlots: field.workingHours.map((slot) => {
+    const reservations = await Reservation.find({
+      business: businessId,
+      date: selectedDate, // ✅ Tarihi doğru formatta filtrele
+      status: 'approved', // ✅ Sadece onaylıları dahil et
+    });
+
+    const availability = business.fields.map((field) => {
+      const timeSlots = field.workingHours.map((slot) => {
+        const timeRange = `${slot.start}-${slot.end}`;
+
         const approvedReservation = reservations.find(
-          (res) => res.timeSlot === `${slot.start}-${slot.end}` && res.fieldName === field.name && res.status === 'approved'
+          (res) => res.timeSlot === timeRange && res.fieldName === field.name
         );
 
         return {
-          timeSlot: `${slot.start}-${slot.end}`,
-          isAvailable: !approvedReservation, // Eğer approved varsa available değil
+          timeSlot: timeRange,
+          isAvailable: !approvedReservation,
           status: approvedReservation ? 'approved' : 'available',
-          user: approvedReservation ? approvedReservation.user : null, // Kullanıcı bilgisi ekleyelim
+          user: approvedReservation ? approvedReservation.user : null,
         };
-      }),
-    }));
+      });
+
+      return {
+        fieldName: field.name,
+        capacity: field.capacity,
+        timeSlots,
+      };
+    });
 
     res.status(200).json({ date, slots: availability });
   } catch (error) {
@@ -41,13 +58,81 @@ const getAvailableSlots = async (req, res) => {
   }
 };
 
+const getWeeklyAvailableSlots = async (req, res) => {
+  try {
+    const { businessId, startDate, endDate } = req.query;
+
+    if (!businessId || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Gerekli parametreler eksik.' });
+    }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı.' });
+    }
+
+    const fields = business.fields;
+    const reservations = await Reservation.find({
+      business: businessId,
+      date: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      status: 'approved'
+    });
+
+    const weeklyData = fields.map((field) => {
+      const timeSlots = field.workingHours.map((slot) => `${slot.start}-${slot.end}`);
+      const weeklySlots = [];
+
+      for (
+        let d = new Date(startDate);
+        d <= new Date(endDate);
+        d.setDate(d.getDate() + 1)
+      ) {
+        const currentDate = new Date(d).toISOString().split('T')[0];
+
+        const dayReservations = reservations.filter(
+          (res) => res.date.toISOString().split('T')[0] === currentDate && res.fieldName === field.name
+        );
+
+        const daySlots = timeSlots.map((slot) => {
+          const matchedReservation = dayReservations.find((res) => res.timeSlot === slot);
+
+          return {
+            timeSlot: slot,
+            isAvailable: !matchedReservation,
+            status: matchedReservation ? 'approved' : 'available'
+          };
+        });
+
+        weeklySlots.push({ date: currentDate, daySlots });
+      }
+
+      return {
+        fieldName: field.name,
+        capacity: field.capacity,
+        weeklyData: weeklySlots
+      };
+    });
+
+    res.status(200).json({ weeklyData });
+  } catch (error) {
+    res.status(500).json({ message: 'Veriler alınırken hata oluştu.', error });
+  }
+};
+
 // Kullanıcının belirli bir halısaha için haftalık rezervasyon sayısını kontrol etme fonksiyonu
 const checkWeeklyReservationLimit = async (userId, businessId, date) => {
-  const startOfWeek = new Date(date);
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Haftanın başlangıcı (Pazartesi)
-  
+  const current = new Date(date);
+
+  // Haftanın ilk günü Pazartesi olsun (Pazar yerine)
+  const day = current.getDay();
+  const diffToMonday = (day === 0 ? -6 : 1) - day; // 0 (Pazar) ise -6, 1 (Pazartesi) ise 0, 2 ise -1...
+  const startOfWeek = new Date(current);
+  startOfWeek.setDate(current.getDate() + diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0);
+
   const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Haftanın sonu (Pazar)
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
 
   const count = await Reservation.countDocuments({
     user: userId,
@@ -55,7 +140,7 @@ const checkWeeklyReservationLimit = async (userId, businessId, date) => {
     date: { $gte: startOfWeek, $lte: endOfWeek },
   });
 
-  return count >= 3; // Kullanıcı 3 veya daha fazla rezervasyon yaptıysa true döner
+  return count >= 3;
 };
 
 const createReservation = async (req, res) => {
@@ -116,8 +201,18 @@ const getBusinessReservations = async (req, res) => {
       return res.status(400).json({ message: 'İşletme ID gerekli.' });
     }
 
-    const reservations = await Reservation.find({ business: businessId })
-      .populate('user', 'fullName email')
+    // const sevenDaysAgo = new Date();
+    // sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const reservations = await Reservation.find({ 
+      business: businessId,
+      // date: { $gte: sevenDaysAgo },
+      $or: [
+        { fromSubscription: { $exists: false } },
+        { fromSubscription: null }
+      ] // ❗ Abonelik rezervasyonlarını hariç tut 
+    })
+      .populate('user', 'fullName email phone')
       .populate('business', 'fields.name')
       .sort({ createdAt: -1 }); // En yeni istekler en üstte olacak şekilde sırala
 
@@ -286,21 +381,17 @@ const getWeeklyReservations = async (req, res) => {
         );
 
         const daySlots = timeSlots.map((slot) => {
-          const approvedReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'approved');
-          const pendingReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'pending');
-          const rejectedReservation = dayReservations.find((res) => res.timeSlot === slot && res.status === 'rejected');
-
+          const matchedReservation =
+            dayReservations.find((res) => res.timeSlot === slot && res.status === 'approved') ||
+            dayReservations.find((res) => res.timeSlot === slot && res.status === 'pending') ||
+            dayReservations.find((res) => res.timeSlot === slot && res.status === 'rejected');
+        
           return {
             timeSlot: slot,
-            isAvailable: !approvedReservation && !pendingReservation, // Eğer approved varsa available değil
-            user: approvedReservation ? approvedReservation.user : null,
-            status: approvedReservation
-              ? 'approved'
-              : pendingReservation
-              ? 'pending'
-              : rejectedReservation
-              ? 'rejected'
-              : 'available',
+            isAvailable: !matchedReservation || matchedReservation.status === 'available',
+            user: matchedReservation?.user || null,
+            status: matchedReservation?.status || 'available',
+            reservationId: matchedReservation?._id?.toString() || null, // ✅ BURASI EKLENDİ
           };
         });
 
@@ -320,13 +411,95 @@ const getWeeklyReservations = async (req, res) => {
   }
 };
 
+const getDailyReservations = async (req, res) => {
+  try {
+    const { businessId, date } = req.query;
+
+    if (!businessId || !date) {
+      return res.status(400).json({ message: 'İşletme ID ve tarih gerekli.' });
+    }
+
+    const business = await Business.findById(businessId);
+    if (!business) {
+      return res.status(404).json({ message: 'İşletme bulunamadı.' });
+    }
+
+    const reservations = await Reservation.find({
+      business: businessId,
+      date: new Date(date),
+    }).populate('user', 'fullName email');
+
+    const data = business.fields.map((field) => {
+      const timeSlots = field.workingHours.map((slot) => `${slot.start}-${slot.end}`);
+
+      const daySlots = timeSlots.map((slot) => {
+        const matchedReservation =
+          reservations.find((res) => res.timeSlot === slot && res.fieldName === field.name);
+
+        return {
+          timeSlot: slot,
+          isAvailable: !matchedReservation,
+          status: matchedReservation?.status || 'available',
+          user: matchedReservation?.user || null,
+          reservationId: matchedReservation?._id?.toString() || null,
+        };
+      });
+
+      return {
+        fieldName: field.name,
+        capacity: field.capacity,
+        daySlots,
+      };
+    });
+
+    res.status(200).json({ date, dailyData: data });
+  } catch (error) {
+    res.status(500).json({ message: 'Günlük veriler alınamadı.', error });
+  }
+};
+
+const deleteReservation = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Geçersiz ID formatı.' });
+    }
+
+    const reservation = await Reservation.findById(req.params.id);
+    if (!reservation) {
+      return res.status(404).json({ message: 'Rezervasyon bulunamadı.' });
+    }
+
+    // Silinen rezervasyon bilgilerine göre eşleşen ama reddedilmiş olanları tekrar pending yap
+    await Reservation.updateMany(
+      {
+        business: reservation.business,
+        date: reservation.date,
+        timeSlot: reservation.timeSlot,
+        fieldName: reservation.fieldName,
+        status: 'rejected',
+      },
+      { $set: { status: 'pending' } }
+    );
+
+    await reservation.deleteOne();
+
+    res.status(200).json({ message: 'Rezervasyon silindi ve saat tekrar kullanılabilir hale geldi.' });
+  } catch (error) {
+    console.error('❌ Silme hatası:', error);
+    res.status(500).json({ message: 'Rezervasyon silinirken hata oluştu.', error });
+  }
+};
+
 module.exports = { 
   getAvailableSlots, 
+  getWeeklyAvailableSlots,
   createReservation, 
   getBusinessReservations, 
   approveReservation, 
   rejectReservation, 
   getReservationSlots, 
   getWeeklyReservations,
-  checkWeeklyReservationLimit
+  getDailyReservations,
+  checkWeeklyReservationLimit,
+  deleteReservation
 };

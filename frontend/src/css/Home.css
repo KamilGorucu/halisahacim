@@ -189,63 +189,181 @@ body {
   background: linear-gradient(135deg, #dbeeff, #a6d8ff);
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .fixed-section {
     width: 85%;
-    height: auto;
-    padding: 30px;
+    padding: 40px;
+  }
+
+  .section-title {
+    font-size: 2rem;
   }
 
   .promo-video {
-    height: 250px;
+    max-height: 360px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .why-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .feature-card p {
+    font-size: 0.95rem;
+  }
+
+  .why-card p {
+    font-size: 0.95rem;
+  }
+
+  .business-card p {
+    font-size: 0.95rem;
+  }
+
+  .action-button {
+    padding: 10px 16px;
+    font-size: 1rem;
+  }
+
+  .features-grid,
+  .business-grid,
+  .why-choose-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .fixed-section {
     width: 90%;
-    height: auto;
-    padding: 25px;
+    padding: 30px;
+  }
+
+  .section-title {
+    font-size: 1.7rem;
   }
 
   .promo-video {
-    height: 200px;
+    max-height: 280px;
   }
 
-  .business-grid,
-  .why-choose-grid,
-  .features-grid {
-    grid-template-columns: 1fr;
-    padding: 10px;
-  }
-
-  .business-card,
-  .why-card,
-  .feature-card {
-    padding: 15px;
+  .feature-card h3 {
+    font-size: 1.1rem;
   }
 
   .why-card h3 {
     font-size: 1.1rem;
   }
 
+  .feature-card p {
+    font-size: 0.9rem;
+  }
+
   .why-card p {
     font-size: 0.9rem;
   }
 
-  .section-title {
-    font-size: 1.8rem;
+  .business-card p {
+    font-size: 0.9rem;
+  }
+
+  .action-button {
+    padding: 9px 14px;
+    font-size: 0.95rem;
+  }
+
+  .features-grid,
+  .business-grid,
+  .why-choose-grid {
+    grid-template-columns: 1fr;
+    padding: 5px;
+    gap: 12px;
+  }
+
+  .feature-card {
+    padding: 18px;
+  }
+
+  .business-card {
+    padding: 20px;
+  }
+
+  .why-card {
+    padding: 16px;
   }
 }
 
-@media (max-width: 512px) {
+@media (max-width: 480px) {
   .fixed-section {
     width: 95%;
     padding: 20px;
   }
 
   .section-title {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
+  }
+
+  .promo-video {
+    max-height: 200px;
+  }
+
+  .feature-card h3 {
+    font-size: 0.9rem;
+  }
+
+  .why-card h3 {
+    font-size: 1rem;
+  }
+
+  .feature-card p {
+    font-size: 0.8rem;
+  }
+
+  .why-card p {
+    font-size: 0.88rem;
+  }
+
+  .business-card p {
+    font-size: 0.88rem;
+  }
+
+  .action-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.88rem;
+  }
+
+  .features-grid,
+  .business-grid,
+  .why-choose-grid {
+    grid-template-columns: 1fr;
+    padding: 0;
+    gap: 10px;
+  }
+
+  .feature-card {
+    padding: 2px;
+  }
+
+  .business-card {
+    padding: 12px;
+  }
+
+  .why-card {
+    padding: 3px;
+  }
+
+  .video-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px;
   }
 }

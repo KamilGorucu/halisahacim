@@ -87,8 +87,8 @@ const getChatList = async (req, res) => {
     for (let chat of chatIds) {
       const parsedChat = JSON.parse(chat);
       if (parsedChat.model === 'User') {
-        const user = await User.findById(parsedChat.id).select('_id fullName');
-        if (user) chatList.push({ id: user._id, name: user.fullName, type: 'User' });
+        const user = await User.findById(parsedChat.id).select('_id fullName role');
+        if (user) chatList.push({ id: user._id, name: user.fullName, role: user.role, type: 'User' });
       } else {
         const business = await Business.findById(parsedChat.id).select('_id businessName');
         if (business) chatList.push({ id: business._id, name: business.businessName, type: 'Business' });
@@ -143,18 +143,29 @@ const getChatListForBusiness = async (req, res) => {
 // Yeni mesaj bildirimlerini getir
 const getUnreadMessages = async (req, res) => {
   try {
-      const userId = req.user?._id || req.businessId;
-      const userModel = req.user ? 'User' : 'Business';
+    const loggedInId = req.user?._id || req.businessId;
+    const loggedInModel = req.user ? 'User' : 'Business';
 
-      const messages = await Message.find({
-          receiver: userId,
-          receiverModel: userModel,
-          isRead: false,
-      }).populate('sender', 'fullName businessName');
+    const messages = await Message.find({
+      receiver: loggedInId,
+      receiverModel: loggedInModel,
+      isRead: false,
+    }).populate('sender', 'fullName businessName');
 
-      res.status(200).json(messages);
+    // Her mesaj için karşı tarafın ID'sini belirle
+    const formatted = messages.map(msg => {
+      return {
+        _id: msg._id,
+        content: msg.content,
+        chatId: msg.sender._id, // 👈 bu satır kritik!
+        sender: msg.sender,
+        timestamp: msg.timestamp
+      };
+    });
+
+    res.status(200).json(formatted);
   } catch (error) {
-      res.status(500).json({ message: 'Bildirimler alınamadı.', error });
+    res.status(500).json({ message: 'Bildirimler alınamadı.', error });
   }
 };
 

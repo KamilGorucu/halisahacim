@@ -1,99 +1,155 @@
-/* Ana Konteyner */
 .opponent-container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  /* Başlık */
-  .opponent-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1B5E20;
-    margin-bottom: 20px;
-  }
-  
-  /* Liste */
-  .opponent-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  /* Liste Öğesi */
-  .opponent-item {
-    background: #f9f9f9;
-    border-radius: 8px;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.opponent-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1B5E20;
+  margin-bottom: 20px;
+}
+
+.opponent-list {
+  list-style: none;
+  padding: 0;
+}
+
+/* Liste öğesi */
+.opponent-item {
+  display: flex;
+  justify-content: center; /* tüm kartı ortala */
+  margin-bottom: 20px;
+}
+
+/* Açıklamalar ve kart birlikte */
+.opponent-inner {
+  display: flex;
+  min-height: 260px; /* ✅ Tüm kartlar minimum bu yükseklikte olsun */
+  height: auto;
+  gap: 40px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  align-items: center;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Sol alan */
+.opponent-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+}
+
+.opponent-info {
+  font-size: 15px;
+  color: #333;
+  margin: 4px 0;
+  white-space: normal; /* ✅ Uzun yazılar alta kaysın */
+  word-break: break-word; /* ✅ Taşma olursa kelimeyi bölsün */
+  max-width: 100%;
+}
+
+.opponent-user-link {
+  color: #1B5E20;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.opponent-user-link:hover {
+  color: #4CAF50;
+}
+
+.opponent-buttons {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.opponent-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.message-btn {
+  background: #1B5E20;
+  color: white;
+}
+.message-btn:hover {
+  background: #4CAF50;
+}
+
+.found-btn {
+  background: #FFD700;
+  color: black;
+}
+.found-btn:hover {
+  background: #FFC107;
+}
+
+/* Sağdaki kart */
+.opponent-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opponent-empty {
+  font-size: 16px;
+  color: #888;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+/* 📱 Mobil (768px ve altı) */
+@media (max-width: 768px) {
+  .opponent-inner {
+    flex-direction: column;
+    gap: 20px;
     padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   }
-  
-  /* Bilgi Parçaları */
-  .opponent-info {
-    font-size: 16px;
-    color: #333;
-    margin: 5px 0;
+
+  .opponent-details {
+    text-align: center;
+    align-items: center;
   }
-  
-  /* Kullanıcı Bağlantısı */
-  .opponent-user-link {
-    color: #1B5E20;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-  
-  .opponent-user-link:hover {
-    color: #4CAF50;
-  }
-  
-  /* Butonlar İçin Kapsayıcı */
+
   .opponent-buttons {
-    margin-top: 10px;
-    display: flex;
     justify-content: center;
-    gap: 10px;
   }
-  
-  /* Butonlar */
-  .opponent-button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
+
+  .opponent-title {
+    font-size: 20px;
+  }
+
+  .opponent-info {
     font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
   }
-  
-  /* Mesajlaş Butonu */
-  .message-btn {
-    background: #1B5E20;
-    color: white;
+
+  .opponent-button {
+    font-size: 12px;
+    padding: 5px 10px;
   }
-  
-  .message-btn:hover {
-    background: #4CAF50;
+
+  .opponent-card {
+    width: 100%;
+    justify-content: center;
   }
-  
-  /* Rakip Bulundu Butonu */
-  .found-btn {
-    background: #FFD700;
-    color: black;
+
+  .opponent-container {
+    padding: 15px;
+    margin: 10px;
   }
-  
-  .found-btn:hover {
-    background: #FFC107;
-  }
-  
-  /* Boş Mesaj */
-  .opponent-empty {
-    font-size: 16px;
-    color: #888;
-    font-style: italic;
-    margin-top: 20px;
-  }
-  
+}

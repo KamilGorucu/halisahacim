@@ -8,6 +8,8 @@ const reservationSchema = new mongoose.Schema(
     timeSlot: { type: String, required: true },
     fieldName: { type: String, required: true },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    isRecurring: { type: Boolean, default: false },
+    fromSubscription: { type: mongoose.Schema.Types.ObjectId, ref: 'SubscriptionRequest' },
   },
   { timestamps: true }
 );

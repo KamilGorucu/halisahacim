@@ -6,8 +6,31 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true }, // Kullanıcının şifresi (hashed)
   role: { type: String, enum: ["user", "admin"], default: "user" },
   phone: {type: String, required: true},
+  city: { type: String, required: true }, // ➔ YENİ: Kayıt sırasında seçilecek
   teams: { type: [String] }, // Kullanıcının oynadığı takımlar
-  position: { type: String }, // Kullanıcının oynadığı mevki
+  photo: { type: String, default: '' }, // Profil fotoğrafı dosya yolu
+  position: {
+    type: String,
+    enum: [
+      'Kaleci',
+      'Stoper',
+      'Bek',
+      'Orta Saha',
+      'Ofansif Orta Saha',
+      'Kanat',
+      'Forvet',
+    ],
+    required: true,
+  },
+  foot: { type: String, enum: ['Sağ', 'Sol', 'Çift'], default: 'Sağ' },
+  fifaStats: {
+    speed: { type: Number, default: 50 },
+    shooting: { type: Number, default: 50 },
+    passing: { type: Number, default: 50 },
+    dribbling: { type: Number, default: 50 },
+    defense: { type: Number, default: 50 },
+    physical: { type: Number, default: 50 },
+  },
   failedLoginAttempts: { type: Number, default: 0 }, 
   isLocked: { type: Boolean, default: false }, // Hesap kilitli mi?
   lockUntil: { type: Date }, // Hesap kilitliyse ne zamana kadar kilitli kalacağı
@@ -15,6 +38,8 @@ const UserSchema = new mongoose.Schema({
     totalScore: { type: Number, default: 0 }, // Toplam puan
     ratingCount: { type: Number, default: 0 }, // Puan veren kişi sayısı
   },
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // ➔ YENİ
+  pendingFriends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // ➔ YENİ
 });
 
 UserSchema.methods.getAverageRating = function () {

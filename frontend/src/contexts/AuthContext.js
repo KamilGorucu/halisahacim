@@ -10,13 +10,27 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
+    const fetchUserDetails = async (userId, email) => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Kullanıcı detayları alınamadı');
+        const data = await response.json();
+        setUser({ ...data, id: userId, email, role: 'user' });
+      } catch (error) {
+        console.error('Kullanıcı detayları alınamadı:', error);
+        logout();
+      }
+    };
+
     if (token) {
       try {
         const decoded = jwtDecode(token);
         console.log('📌 JWT Decode:', decoded); // Debugging için ekle
         if (decoded.exp * 1000 > Date.now()) {
           if (decoded.role === 'user') {
-            setUser({ id: decoded.id, email: decoded.email, role: 'user' });
+            fetchUserDetails(decoded.id, decoded.email);
           } else if (decoded.role === 'business') {
             setBusiness({ id: decoded.id || decoded._id, email: decoded.email, role: 'business', isActive: decoded.isActive });
             localStorage.setItem('businessId', decoded.id || decoded._id); // Business ID'yi sakla

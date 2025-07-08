@@ -1,29 +1,35 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
-import Recaptcha from './Recaptcha';
 import '../css/BusinessLogin.css';
+import Recaptcha from '../components/Recaptcha';
+
 const API_URL = process.env.REACT_APP_API_URL;
+
 const BusinessLogin = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    recaptchaToken: '',
   });
-  // const [recaptchaToken, setRecaptchaToken] = useState('');
   const navigate = useNavigate();
   const { login, setBusiness } = useContext(AuthContext); // Giriş işlemi için AuthContext'ten `login` fonksiyonunu al.
+  
+  const handleRecaptchaVerify = (token) => {
+      setFormData((prev) => ({ ...prev, recaptchaToken: token }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (!recaptchaToken) {
-    //   alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
-    //   return;
-    // }
+    if (!formData.recaptchaToken) {
+       alert("Lütfen reCAPTCHA doğrulamasını tamamlayın!");
+       return;
+    }
     // Emaili normalize et
     const normalizedEmail = formData.email.trim().toLowerCase();
   
     try {
-      const response = await fetch(`${API_URL}/business/login`, {
+      const response = await fetch(`${API_URL}/api/business/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, email: normalizedEmail, }),
@@ -54,28 +60,44 @@ const BusinessLogin = () => {
   };  
 
   return (
-    <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2 className="login-title">İşletme Giriş</h2>
-        <input
-          type="email"
-          className="login-input"
-          placeholder="E-posta"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          className="login-input"
-          placeholder="Şifre"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          required
-        />
-         {/* <Recaptcha onVerify={(token) => setRecaptchaToken(token)} /> */}
-        <button className="login-button" type="submit">Giriş Yap</button>
-      </form>
+    <div className="container d-flex justify-content-center align-items-center min-vh-100">
+      <div className="card shadow p-4" style={{ maxWidth: '400px', width: '100%' }}>
+        <form className="w-100" style={{ maxWidth: '400px' }} onSubmit={handleSubmit}>
+          <h2 className="text-center mb-4 text-success">İşletme Giriş</h2>
+    
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">E-posta</label>
+            <input
+              type="email"
+              id="email"
+              className="form-control rounded"
+              placeholder="E-posta adresinizi girin"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              />
+          </div>
+    
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">Şifre</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control rounded"
+              placeholder="Şifrenizi girin"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+              />
+          </div>
+    
+          { <Recaptcha onVerify={handleRecaptchaVerify} /> }
+    
+          <button type="submit" className="btn btn-success w-100 rounded mt-3">
+            Giriş Yap
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

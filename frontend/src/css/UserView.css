@@ -1,35 +1,56 @@
-/* Kullanıcı Profili Konteyner */
 .user-view-container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.user-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1B5E20;
+  margin-bottom: 20px;
+}
+
+.user-view-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.user-view-details {
+  text-align: left;
+  font-size: 16px;
+  flex: 1;
+  min-width: 250px;
+}
+
+.user-view-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 18px;
+  text-align: center;
+  color: #999;
+  margin-top: 40px;
+}
+
+/* 📱 Mobil için düzenleme */
+@media (max-width: 768px) {
+  .user-view-inner {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .user-view-details {
     text-align: center;
   }
-  
-  /* Kullanıcı Adı */
-  .user-name {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1B5E20;
-    margin-bottom: 15px;
-  }
-  
-  /* Kullanıcı Bilgileri */
-  .user-details {
-    font-size: 16px;
-    color: #333;
-    line-height: 1.6;
-    text-align: left;
-  }
-  
-  /* Yükleniyor Metni */
-  .loading-text {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: #666;
-  }
-  
+}

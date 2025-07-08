@@ -9,7 +9,7 @@ const TournamentList = () => {
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
-        const response = await fetch(`${API_URL}/tournaments?city=${city}`);
+        const response = await fetch(`${API_URL}/api/tournaments?city=${city}`);
         const data = await response.json();
         setTournaments(data);
       } catch (error) {
